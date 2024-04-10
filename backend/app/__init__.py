@@ -3,7 +3,9 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
 from uuid import uuid4
 from sqlalchemy import Date
+from flask_cors import CORS
 
+# INICIALIZACIÓN DE LA APLICACIÓN ========================================================================================
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///test.db'
@@ -14,6 +16,9 @@ db = SQLAlchemy(app)
 app.config['JWT_SECRET_KEY'] = 'esternocleidomastoideo'
 
 jwt = JWTManager(app)
+
+# Configuración de CORS
+CORS(app, resources={r"/*": {"origins": "*"}})
 
 # MODELOS ================================================================================================================
 class User(db.Model):
