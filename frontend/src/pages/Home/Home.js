@@ -3,6 +3,8 @@ import './Home.css';
 import background from '../../assets/background.svg';
 
 import Resumen from '../../components/Resumen/Resumen';
+import Fijos from '../../components/Fijos/Fijos';
+import Esporadicos from '../../components/Esporadicos/Esporadicos';
 
 function Home () {
 
@@ -43,10 +45,10 @@ function Home () {
           <Resumen />
         </section>
         <section id="fijos" className='slide-out' style={{display: 'none'}}>
-          <Resumen />
+          <Fijos />
         </section>
         <section id="esporadicos" className='slide-out' style={{display: 'none'}}>
-          <Resumen />
+          <Esporadicos />
         </section>
       </main>
       <Navbar setSection={selectSection}/>
