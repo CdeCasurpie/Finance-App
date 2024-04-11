@@ -1,8 +1,11 @@
 import logo from '../../assets/logo.png';
 import './LoginRegister.css';
 import React, {useState} from 'react';
+import background from '../../assets/background.svg';
 
 function LoginRegister(){
+    let token = localStorage.getItem('token');
+
     const [isLoggin, setState] = useState(true);
     const [errors, setErrors] = useState([]);
 
@@ -20,6 +23,18 @@ function LoginRegister(){
         setErrors(errores);
     }
 
+    const goHome = () => {
+        document.querySelector('.login-container').classList.add('out-slide');
+        setTimeout(() => {
+            window.location.href = '/';
+        }, 500);
+    }
+
+    setTimeout(() => {
+        if(token){
+            goHome();
+        }
+    }, 500);
 
     const login = (e) => {
         e.preventDefault();
@@ -53,9 +68,8 @@ function LoginRegister(){
         .then(response => response.json())
         .then(data => {
             if(data.success){
-                alert(data.message);
                 localStorage.setItem('token', data.access_token);
-                window.location.href = '/';
+                goHome();
             } else {
                 setError(data.errors);
             }
@@ -105,9 +119,8 @@ function LoginRegister(){
         .then(response => response.json())
         .then(data => {
             if(data.success){
-                alert(data.message);
                 localStorage.setItem('token', data.access_token);
-                window.location.href = '/';
+                goHome();
             } else {
                 setError(data.errors);
             }
@@ -120,10 +133,15 @@ function LoginRegister(){
 
     return (
         <div class="LoginRegister-container">
+            <div class="background-container">
+                <svg className='back-svg'>
+                    <image href={background} width="100%" height="100%"/>
+                </svg>
+            </div>
             <div class="login-container">
                 <div class="title">
                     <img src={logo} alt="logo" />
-                    <h2>My app</h2>
+                    <h2>BenjiOr Fin</h2>
                 </div>
                 
                 { isLoggin && (
@@ -147,7 +165,7 @@ function LoginRegister(){
                             </div>
                         )
                     }
-                    <a href="/">¿Olvidaste tu contraseña?</a>
+                    {/* <a href="/">¿Olvidaste tu contraseña?</a> */}
                     <button type="submit" onClick={login}>Login</button>
                     <button type="button" onClick={setRegistering}>Registrarse</button>
                 </form>

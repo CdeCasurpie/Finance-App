@@ -304,7 +304,7 @@ def register():
             
             user_temp = User.query.filter_by(email=email).first()
             if user_temp is not None:
-                return jsonify({'success': False, 'message': 'El email ya está registrado'}), 400
+                return jsonify({'success': False, 'errors': ['El email ya está registrado']}), 400
             
             try:
                 user = User(email=email, password=password, telefono=data['telefono'] if 'telefono' in data else None)

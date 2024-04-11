@@ -1,0 +1,98 @@
+.navbar__button {
+    background: var(--primary-color);
+    color: var(--secondary-color);
+    border: 1px solid var(--primary-color);
+    padding: 20px;
+    border-radius: 5px;
+    margin: 0.5rem 0;
+    font-size: 1rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: 0.2s;
+}
+
+.navbar__button:hover {
+    background: var(--secondary-color);
+    color: var(--card-color);
+    transition: 0.2s;
+    transform: scale(1.03);
+}
+
+.navbar__button:active {
+    background: var(--card-color);
+    color: var(--secondary-color);
+    border: 1px solid var(--secondary-color);
+    transition: 0.2s;
+    transform: scale(0.95);
+}
+
+.logout__button {
+    background: var(--card-color);
+    color: var(--secondary-color);
+    border: 1px solid var(--secondary-color);
+    padding: 20px;
+    border-radius: 5px;
+    margin: 0.5rem 0;
+    font-size: 1rem;
+    height: 70px;
+    align-self: end;
+}
+
+.navbar h1 {
+    color: var(--secondary-color);
+    font-size: 1.5rem;
+    text-align: center;
+    border-bottom: 1px solid var(--secondary-color);
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    margin-bottom: 15px;
+    padding-top: 20px;
+}
+
+.white__space {
+    background: none;
+    border: 1px solid var(--secondary-color);
+    padding: 20px;
+    border-radius: 5px;
+    margin: 0.5rem 0;
+    transition: 0.2s;
+    opacity: 0.05;
+
+}
+
+
+.selected {
+    background: var(--secondary-color);
+    color: var(--card-color);
+    border: 1px solid var(--secondary-color);
+    padding: 20px;
+    border-radius: 5px;
+    margin: 0.5rem 0;
+    font-size: 1rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: 0.2s;
+}
+
+.navbar {
+    display: grid;
+    grid-template-rows: 120px repeat(3, 70px) 1fr;
+    padding: 1rem;
+    background-color: var(--card-color);
+    box-shadow: 50px 0 50px var(--dark-primary-color);
+    animation: slideIn 0.5s forwards;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(150%);
+        box-shadow: -100px 0 0px var(--dark-primary-color);
+    }
+    to {
+        transform: translateX(0);
+        box-shadow: -5px 0 0px var(--dark-primary-color);
+    }
+}
