@@ -34,7 +34,7 @@ function Home () {
 
   return (
     <div className="home">
-      <div class="background-container">
+      <div className="background-container-home">
           <svg className='back-svg2'>
               <image href={background} width="100%" height="100%"/>
           </svg>

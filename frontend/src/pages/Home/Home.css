@@ -1,6 +1,5 @@
 .home {
-    display: grid;
-    grid-template-columns: 1fr 250px;
+    display: flex;
     height: 100vh;
     overflow: hidden;
 }
@@ -10,6 +9,13 @@ main {
     justify-content: center;
     align-items: center;
     z-index: 0;
+    width: calc(100% - 200px);
+}
+
+@media (max-width: 768px) {
+    main {
+        width: 100%;
+    }
 }
 
 section {
@@ -18,7 +24,7 @@ section {
     z-index: 1;
 }
 
-.background-container {
+.background-container-home {
     position: absolute;
     top: 0;
     left: 0;
@@ -31,17 +37,16 @@ section {
     flex-direction: column;
     z-index: -1;
 
-    background-color: var(--primary-color);
+    background-color: var(--background-color);
 }
 
-.background-container .back-svg2 {
-    background-color: var(--primary-color);
-    opacity: 0.3;
+.background-container-home .back-svg2 {
+    opacity: 0;
     width: 1920px;
     height: 1080px;
     z-index: -1;
-
-    animation: opacity 2s;
+    background-color: var(--primary-color);
+    animation: opacity 1s;
 }
 
 @keyframes opacity {
@@ -49,7 +54,7 @@ section {
         opacity: 1;
     }
     100% {
-        opacity: 0.3;
+        opacity: 0;
     }
 }
 
