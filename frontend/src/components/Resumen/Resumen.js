@@ -1,6 +1,9 @@
 import './Resumen.css';
+import { useState } from 'react';
 
 function Resumen() {
+
+    const [year, setYear] = useState(2024);
 
     const ingresosEsporadicos = [
         {
@@ -95,7 +98,15 @@ function Resumen() {
 
     return (
         <div className="main-container">
-            <h1>Resumen</h1>
+            <h1 className='h1-resumen'>
+                Resumen
+                
+                <div className='change-year'>
+                    <button className='change-year-button' onClick={() => setYear(year - 1)}>{'<'}</button>
+                    <div className='year'>{year}</div>
+                    <button className='change-year-button' onClick={() => setYear(year + 1)}>{'>'}</button>
+                </div>
+            </h1>
             <div className="resumen-container">
                 <div className='sub-card esporadicos'>
                     <h2>Esporádicos</h2>

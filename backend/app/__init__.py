@@ -2,8 +2,8 @@ from flask import Flask, request, redirect, url_for, jsonify, abort
 from flask_sqlalchemy import SQLAlchemy
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
 from uuid import uuid4
-from sqlalchemy import Date
 from flask_cors import CORS
+from datetime import datetime
 
 # INICIALIZACIÓN DE LA APLICACIÓN ========================================================================================
 
@@ -20,6 +20,33 @@ jwt = JWTManager(app)
 # Configuración de CORS
 CORS(app, resources={r"/*": {"origins": "*"}})
 
+
+# DECORADORES ============================================================================================================
+# crear decorador para verificar si se requiere que el usuario sea user y no espectador
+def user_required(fn):
+    def wrapper(*args, **kwargs):
+        try:
+            current_user = get_jwt_identity()
+            model = current_user['model']
+            
+            if model != 'user':
+                return jsonify({'success': False, 'message': 'No autorizado'}), 401
+        except Exception as e:
+            print(e)
+            if e == 'Signature has expired':
+                return jsonify({'success': False, 'message': 'Token expirado'}), 401
+            else:
+                return jsonify({'success': False, 'message': 'Token inválido'}), 401
+        
+        return fn(*args, **kwargs)
+            
+    return wrapper
+
+
+def generate_invitation_code():
+    return str(uuid4())
+
+
 # MODELOS ================================================================================================================
 class User(db.Model):
     __name__ = 'user'
@@ -28,6 +55,8 @@ class User(db.Model):
     email = db.Column(db.String(200), unique=True, nullable=False)
     password = db.Column(db.String(200), nullable=False)
     telefono = db.Column(db.String(50))
+
+    espectator_code = db.Column(db.String(50), default=lambda: generate_invitation_code(), unique=True, nullable=False)
 
     def check_password(self, password):
         return self.password == password
@@ -39,7 +68,7 @@ class Cliente(db.Model):
     nombre = db.Column(db.String(50), nullable=False)
     telefono = db.Column(db.String(50), nullable=False)
     direccion = db.Column(db.String(50), nullable=False)
-    fecha_instalacion = db.Column(Date, nullable=False)
+    fecha_instalacion = db.Column(db.DateTime, default=lambda: datetime.now(), nullable=False)
     sede = db.Column(db.String(50), nullable=False)
     paquete = db.Column(db.String(50), nullable=False)
     login = db.Column(db.String(50), nullable=False, unique=True)
@@ -48,6 +77,7 @@ class Cliente(db.Model):
     status = db.Column(db.Boolean, nullable=False)
     monto = db.Column(db.Float, nullable=False)
     iptv = db.Column(db.Integer, nullable=False)
+    paymentDate = db.Column(db.DateTime, nullable=True)
 
     user = db.Column(db.String(50), db.ForeignKey('user.id'), nullable=False)
 
@@ -74,7 +104,7 @@ class Deber(db.Model):
     id = db.Column(db.String(50), primary_key=True)
     detalle = db.Column(db.String(100), nullable=False)
     descripcion = db.Column(db.String(200), nullable=False)
-    fecha_inicio = db.Column(Date, nullable=False)
+    fecha_inicio = db.Column(db.DateTime, nullable=False)
     repeticion = db.Column(db.String(50), nullable=False)
 
     user = db.Column(db.String(50), db.ForeignKey('user.id'), nullable=False)
@@ -92,7 +122,7 @@ class Movimiento(db.Model): #clase padre -> ingresos o gastos
     __name__ = 'movimiento'
 
     id = db.Column(db.String(50), primary_key=True)
-    fecha = db.Column(Date, nullable=False)
+    fecha = db.Column(db.DateTime, nullable=False)
     monto = db.Column(db.Float, nullable=False)
 
     user = db.Column(db.String(50), db.ForeignKey('user.id'), nullable=False)
@@ -123,7 +153,6 @@ class Fijo(db.Model):
             'fecha': self.movimiento.fecha,
             'monto': self.movimiento.monto
         }
-
 
 class Esporadico(db.Model):
     __name__ = 'esporadico'
@@ -209,16 +238,18 @@ with app.app_context():
 
 # UTILIDADES =============================================================================================================
 
-def getUser():
+def getUser(user=None):
     try:
-        current_user = get_jwt_identity()
-        user = User.query.filter_by(id=current_user).first()
+        user = user['id']
+        user = User.query.filter_by(id=user).first()
+
+        return user
+
     except Exception as e:
         if e == 'Signature has expired':
             return jsonify({'success': False, 'message': 'Token expirado'}), 401
         else:
             return jsonify({'success': False, 'message': 'Token inválido'}), 401
-    return user
 
 
 def verificar_JSON(data, campos):
@@ -271,13 +302,16 @@ def login():
             return jsonify({
                 'success': True,
                 'message': 'Inicio de sesión exitoso',
-                'access_token': create_access_token(identity=user.id)
+                'access_token': create_access_token(identity={
+                    'id': user.id,
+                    'model': 'user'
+                })
             })
         else:
             return jsonify({'success': False, 'errors': ['Contraseña incorrecta']}), 400
-    except:
+    except Exception as e:
+        print(e)
         abort(500)
-
 
 @app.route('/register', methods=['POST'])
 def register():
@@ -318,7 +352,10 @@ def register():
             return jsonify({
                 'success': True,
                 'message': 'Usuario registrado exitosamente',
-                'access_token': create_access_token(identity=user.id)
+                'access_token': create_access_token({
+                    'id': user.id,
+                    'model': 'user'
+                })
             })
         except Exception as e:
             print(e)
@@ -326,30 +363,94 @@ def register():
     pass
 
 
+@app.route('/login-espectador', methods=['POST'])
+def login_espectador():
+    errors = []
+
+    try:
+        data = request.get_json()
+    except:
+        return jsonify({'success': False, 'message': 'Se esperaba un JSON con "email" y "password"'}), 400
+    
+    try:
+        if 'invitation_code' in data:
+            invitation_code = data['invitation_code']
+        
+        user = User.query.filter_by(espectator_code=invitation_code).first()
+
+        if user is None:
+            return jsonify({'success': False, 'errors': ['El código de invitación no está registrado']}), 400
+
+        return jsonify({
+            'success': True,
+            'message': 'Inicio de sesión como espectador exitoso',
+            'access_token': create_access_token(identity={
+                'id': user.id,
+                'model': 'user'
+            })
+        })
+    except:
+        abort(500)
+
+
+
 # RUTAS DE GESTIÓN DE CLIENTES .........................................................................................
-@jwt_required()
+
+
 @app.route('/cliente', methods=['GET'])
+@jwt_required()
 def get_clientes():
     try:
-        user = getUser()
+        user = getUser(get_jwt_identity())
+
+        # queries args
+        args = request.args
 
         # clientes ordenados por status
         clientes = Cliente.query.filter_by(user=user.id).order_by(Cliente.status).all()
 
         clientes = [cliente.serialize() for cliente in clientes]
 
-        return jsonify({'success': True, 'clientes': clientes})
-    except:
+        if 'year' in args:
+            year = int(args['year'])
+
+            #lista de objetos tipo IngresoFijo donde:
+            # cliente_id = id del cliente
+            # user = id del usuario
+            # el año de la fecha del movimiento sea igual al año solicitado
+
+            pagos = IngresoFijo.query.filter_by(user=user.id).join(Fijo).join(Movimiento).filter(Movimiento.fecha >= datetime(year, 1, 1), Movimiento.fecha <= datetime(year, 12, 31)).all()
+
+            print(pagos)
+            
+            for cliente in clientes:
+                cliente['pagos'] = []
+                for pago in pagos:
+                    if cliente['id'] == pago.cliente_id:
+                        cliente['pagos'].append(pago.serialize())
+                pass
+            pass
+        else:
+            for cliente in clientes:
+                cliente['pagos'] = None
+
+        return jsonify({
+            'success': True,
+            'clientes': clientes
+            })
+    except Exception as e:
+        print(e)
         abort(500)
 
 
-@jwt_required()
 @app.route('/cliente', methods=['POST'])
+@jwt_required()
+@user_required
 def add_cliente():
     campos = ['nombre', 'telefono', 'direccion', 'fecha_instalacion', 'sede', 'paquete', 'login', 'caja', 'borne', 'status', 'monto', 'iptv']
 
     try:
-        user = getUser()
+        user = getUser(get_jwt_identity())
 
         try:
             data = request.get_json()
@@ -358,6 +459,7 @@ def add_cliente():
 
         errors = verificar_JSON(data, campos)
 
+        data['fecha_instalacion'] = datetime.strptime(data['fecha_instalacion'], '%Y-%m-%d')
         if len(errors) > 0:
             return basicError(errors)
         
@@ -370,24 +472,30 @@ def add_cliente():
             sede=data['sede'],
             paquete=data['paquete'],
             login=data['login'],
-            caja=data['caja'],
-            borne=data['borne'],
-            status=data['status'],
-            monto=data['monto'],
-            iptv=data['iptv'],
-            user=user.id
+            caja=int(data['caja']),
+            borne=int(data['borne']),
+            status=bool(data['status']),
+            monto=float(data['monto']),
+            iptv=int(data['iptv']),
+            user=user.id,
+            paymentDate=data['fecha_instalacion'] # fecha de pago por defecto
         )
 
         db.session.add(cliente)
         db.session.commit()
 
         return jsonify({'success': True, 'message': 'Cliente agregado exitosamente'})
-    except:
+    except Exception as e:
+        # si es por la conversión de int o float o bool
+        if e == ValueError:
+            return jsonify({'success': False, 'message': 'Error en la conversión de datos'}), 400
+        
+        print(e)
         abort(500)
 
 
-@jwt_required()
 @app.route('/cliente/<id>', methods=['GET'])
+@jwt_required()
 def get_cliente(id):
     try:
         user = getUser()
@@ -406,6 +514,7 @@ def get_cliente(id):
 
 
 @jwt_required()
+@user_required
 @app.route('/cliente/<id>', methods=['PUT'])
 def update_cliente(id):
     campos = ['nombre', 'telefono', 'direccion', 'fecha_instalacion', 'sede', 'paquete', 'login', 'caja', 'borne', 'status', 'monto', 'iptv']
@@ -444,6 +553,7 @@ def update_cliente(id):
 
 
 @jwt_required()
+@user_required
 @app.route('/cliente/<id>', methods=['DELETE'])
 def delete_cliente(id):
     try:
@@ -482,6 +592,7 @@ def get_deber():
 
 
 @jwt_required()
+@user_required
 @app.route('/deber', methods=['POST'])
 def add_deber():
     campos = ['detalle', 'descripcion', 'fecha_inicio', 'repeticion']
@@ -536,6 +647,7 @@ def get_deber_id(id):
 
 
 @jwt_required()
+@user_required
 @app.route('/deber/<id>', methods=['PUT'])
 def update_deber(id):
     campos = ['detalle', 'descripcion', 'fecha_inicio', 'repeticion']
@@ -656,6 +768,7 @@ def get_movimientos():
 
 
 @jwt_required()
+@user_required
 @app.route('/movimiento/esporadico', methods=['POST'])
 def add_esporadico():
     campos = ['tipo', 'descripcion', 'detalle_pago', 'fecha', 'monto']
@@ -702,6 +815,7 @@ def add_esporadico():
 
 
 @jwt_required()
+@user_required
 @app.route('/movimiento/fijo/<tipo>', methods=['POST'])
 def add_fijo(tipo):
     campos = ['numero_operacion', 'observacion', 'fecha', 'monto']

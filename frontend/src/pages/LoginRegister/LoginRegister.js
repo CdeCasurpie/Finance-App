@@ -6,17 +6,22 @@ import background from '../../assets/background.svg';
 function LoginRegister(){
     let token = localStorage.getItem('token');
 
-    const [isLoggin, setState] = useState(true);
+    const [isLoggin, setState] = useState("login");
     const [errors, setErrors] = useState([]);
 
     const setRegistering = () => {
         setErrors([]);
-        setState(false);
+        setState("register");
     }
 
     const setLoggin = () => {
         setErrors([]);
-        setState(true);
+        setState("login");
+    }
+
+    const setEnteringAsEspectador = () => {
+        setErrors([]);
+        setState("espectador");
     }
 
     const setError = (errores) => {
@@ -131,6 +136,47 @@ function LoginRegister(){
         });
     }
 
+
+    const spectator = (e) => {
+        e.preventDefault();
+        const spectatorForm = document.getElementById("spectator-form");
+        const invitation_code = spectatorForm.invitation_code.value;
+
+        setError([]);
+
+        const errores = [];
+        if(invitation_code === ""){
+            errores.push("El campo código de invitación es requerido");
+        }
+        if(errores.length > 0){
+            setError(errores);
+            return;
+        }
+
+        /* Aquí va el código para hacer login como espectador */
+        // se usa invitation_code en la petición
+        fetch('http://127.0.0.1:5000/login-espectador', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({invitation_code})
+        })
+        .then(response => response.json())
+        .then(data => {
+            if(data.success){
+                localStorage.setItem('token', data.access_token);
+                goHome();
+            } else {
+                setError(data.errors);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            setError(["Error en la petición: algo salió mal"]);
+        });
+    }
+
     return (
         <div class="LoginRegister-container">
             <div class="background-container">
@@ -144,7 +190,7 @@ function LoginRegister(){
                     <h2>BenjiOr Fin</h2>
                 </div>
                 
-                { isLoggin && (
+                { isLoggin === "login" && (
                 <form id="login-form">
                     <div class="form-group">
                         <input type="text" id="email" name="email" required />
@@ -168,10 +214,11 @@ function LoginRegister(){
                     {/* <a href="/">¿Olvidaste tu contraseña?</a> */}
                     <button type="submit" onClick={login}>Login</button>
                     <button type="button" onClick={setRegistering}>Registrarse</button>
+                    <p className='spectator_text'>O puedes <span onClick={setEnteringAsEspectador}>entrar como espectador</span></p>
                 </form>
                 )}
 
-                { !isLoggin && (
+                { isLoggin === "register" && (
                 <form id="register-form">
                     <div class="form-group">
                         <input type="text" id="email" name="email" required />
@@ -197,6 +244,29 @@ function LoginRegister(){
                         )
                     }
                     <button type="submit" onClick={register}>Registrarse</button>
+                    <button type="button" onClick={setLoggin}>Login</button>
+                    <p className='spectator_text'>O puedes <span onClick={setEnteringAsEspectador}>entrar como espectador</span></p>
+                </form>
+                )}
+
+                { isLoggin === "espectador" && (
+                <form id="spectator-form">
+                    <div class="form-group">
+                        <input type="text" id="invitation_code" name="invitation_code" required />
+                        <label for="invitation_code">Código de invitación</label>
+                    </div>
+                    {
+                        errors.length > 0 && (
+                            <div class="errors">
+                            {errors.map((error, index) => (
+                                <div class="error">
+                                    <p key={index}>{error}</p>  
+                                </div>
+                            ))}
+                            </div>
+                        )
+                    }
+                    <button type="submit" onClick={spectator}>Entrar como espectador</button>
                     <button type="button" onClick={setLoggin}>Login</button>
                 </form>
                 )}

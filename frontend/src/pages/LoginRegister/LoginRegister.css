@@ -242,3 +242,15 @@ form button[type="button"]:hover {
         opacity: 1;
     }
 }
+
+.spectator_text {
+    font-size: 15px;
+    color: #7a7a7a;
+    margin-top: 10px;
+}
+
+.spectator_text span {
+    color: #0051a1;
+    cursor: pointer;
+    text-decoration: underline;
+}
