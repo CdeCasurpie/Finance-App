@@ -63,10 +63,10 @@ section {
     width: 100%;
     height: 100vh;
     padding: 50px;
-    overflow-y: scroll;
-
-    display: flex;
-    flex-direction: column;
+    overflow-y:hidden;
+    display: grid;
+    
+    grid-template-rows: 15vh 73vh;
 }
 
 .slide-in {

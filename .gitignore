@@ -9,7 +9,7 @@ app/__pycache__
 
 # Ignore all .pyc files
 *.pyc
-
+env 
 # React
 /node_modules
 /build

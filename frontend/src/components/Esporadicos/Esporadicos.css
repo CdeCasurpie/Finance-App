@@ -1,0 +1,367 @@
+.esporadicos-container {
+    background-color: var(--card-color);
+    border-radius: 10px;
+    flex-grow: 1;
+    display: grid;
+    grid-template-rows: 10vh 50vh 10vh;
+    max-height: 100%;
+
+}
+
+.todo-mov {
+    width: 50%;
+    display: flex;
+    flex-direction: row;
+    gap: 20px;
+    padding: 10px;
+    justify-content: flex-end;
+}
+
+.mov-container span{
+    font-size: 1.5em;
+    font-weight: 700;
+}
+
+.mov {
+    min-width: 50px;
+}
+.ver-todo {
+    display: flex;
+    gap: 10px;
+    padding: 10px;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+
+.ver-todo:hover{
+    cursor: pointer;
+    background-color: var(--background-color);
+    border-radius: 10px;
+}
+.mov{
+    padding: 8px 5px;
+}
+.mov:hover {
+    cursor: pointer;
+    background-color: var(--background-color);
+    border-radius: 10px;
+}
+
+.ver-todo span {
+    padding-top: 6px;
+    display: flex;
+    text-align: center;
+    justify-content: center;
+    align-items: center;
+    min-width: fit-content;
+    
+}
+
+.ver-todo div {
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+    padding: 10px 5px;
+    border-bottom: 1px solid var(--background-color);
+}
+
+
+.mov-container {
+    display: flex;
+    justify-content: center;
+    align-items: center; 
+    flex-direction: row;
+    gap: 20px;
+    border-radius: 10px;
+    overflow: hidden;
+    width: 100%;
+    padding: 30px;
+    position: relative; 
+}
+
+.mov-container::after {
+    margin-left: 30px;
+    content: ""; 
+    position: absolute;
+    left: 0; 
+    bottom: 0;
+    width: 94%;
+    height: 6px; 
+    background-color: var(--background-color); 
+    }
+
+.register{
+    display: flex;
+    align-items: center; 
+    flex-direction: row;
+    gap: 20px;
+    border-radius: 10px;    
+    width: 100%;
+    padding: 5px;
+    padding-right: 80px;
+    padding-left: 30px;
+    height: fit-content;
+    position: relative; 
+    justify-content: space-between;
+}
+
+.register::after{
+    margin-left: 30px;
+    content: ""; 
+    position: absolute;
+    left: 0; 
+    bottom: 0;
+    width: 94%;
+    height: 6px; 
+    background-color: var(--background-color); 
+    
+}
+.mov-container span {
+    display: block;
+    width: 50%;
+    height: 100%;
+}
+
+.detalles{
+    display: flex;
+    padding-right: 100px;
+    flex-direction: column;
+    padding: 10px;
+    border-radius: 10px;
+    color: var(--secondary-color);
+
+}
+.detalles span{
+    font-size: 1.3em;
+    font-weight: 500;
+}
+.Fecha{
+    font-size: 12px;
+}
+.monto{
+    display: flex;
+    padding-right: 50px;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 10px;
+    padding: 10px;
+    border-radius: 10px;
+    color: var(--secondary-color);
+}
+.monto span{
+    font-size: 1.3em;
+    font-weight: 500;
+    display: flex;
+    text-align: center;
+    justify-content: center;
+    align-items: center;
+    min-width: fit-content;
+    
+}
+.register::after{
+    margin-left: 30px;
+    content: ""; 
+    position: absolute;
+    left: 0; 
+    bottom: 0;
+    width: 94%;
+    height: 6px; 
+    background-color: var(--background-color); 
+    
+}
+
+
+.nuevo{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    margin-top: 25px;
+    padding: 10px;
+    border-radius: 10px;
+    color: var(--card-color);
+}
+
+.gastoB{
+    background: white;
+    color: var(--secondary-color);
+    border: 3px solid var(--primary-color);
+    padding: 20px;
+    border-radius: 5px;
+    font-weight: 700;
+    margin: 0.5rem 0;
+    font-size: 1rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: 0.2s;
+}
+
+.ingresoB{
+    background: var(--primary-color);
+    color: var(--secondary-color);
+    border: 3px solid var(--primary-color);
+    padding: 20px;
+    border-radius: 5px;
+    font-weight: 700;
+    margin: 0.5rem 0;
+    font-size: 1rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: 0.2s;
+}
+
+.ingresoB:hover{
+    background: var(--card-color);
+    color: var(--secondary-color);
+    border: 3px solid var(--secondary-color);
+    transition: 0.2s;
+    transform: scale(1.03);
+    cursor: pointer;
+    background-color: var(--background-color);
+    border-radius: 10px;
+}
+
+.overlay {
+    position: fixed;
+    background-color: rgba(0, 0, 0, 0.5);
+    width: 100vw;
+    height: 100vh;
+    top: 0;
+    left: 0;
+    padding: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+
+.containerOverlay{
+    width: 500px;
+    right: 110px;
+    min-height: 100px;
+    background: #fff;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    padding-left: 40px;
+    padding-right: 40px;
+    padding-top: 30px;
+    padding-bottom: 30px;
+    position: relative;
+    border-radius: 5px;
+
+}
+
+/*
+
+    opacity: 0;
+    transform: translateY(-20px);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    .containerOverlay.show {
+    opacity: 1;
+    transform: translateY(0); 
+}
+    */
+
+
+.encabezadoOverlay{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #E8E8E8;
+}
+
+.encabezadoOverlay h2{
+    font-size: 25px;
+    font-weight: bold;
+    color: #001f3f;
+
+}
+.cerrarOverlay{
+    position: absolute;
+    top:20px;
+    right: 20px;
+    width: 30px;
+    height: 30px;
+    border: none;
+    background: none;
+    cursor: pointer;
+    transition: .3s ease all;
+    border-radius: 5px;
+    color: #001f3f;
+
+}
+
+.cerrarOverlay:hover{
+background: #F2F2F2;
+}
+
+
+
+.gastoB:hover{
+    background: var(--primary-color);
+    color: var(--secondary-color);
+    border: 3px solid var(--secondary-color);
+    transition: 0.2s;
+    transform: scale(1.03);
+    cursor: pointer;
+    background-color: var(--background-color);
+    border-radius: 10px;
+}
+
+.formNewG {
+    color:#001f3f;
+    display: flex;
+    flex-direction: column;
+}
+
+.formNewG .campo {
+    margin-bottom: 20px;
+}
+
+.formNewG label {
+    font-weight: 600;
+}
+
+.formNewG input[type="text"],
+.formNewG input[type="number"] {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    transition: border-color 0.3s ease;
+}
+
+.formNewG input[type="text"]:focus,
+.formNewG input[type="number"]:focus {
+    border-color: #007bff;
+}
+
+.formNewG button[type="submit"] {
+    padding: 10px 20px;
+    background-color: #1f78d8;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.formNewG button[type="submit"]:hover {
+    background-color: #0056b3;
+}
+
+
+
+.monto-container{
+    display: flex;
+    flex-direction: column;
+    overflow-y: scroll;
+    gap: 10px;
+    padding: 10px;
+    border-radius: 10px;
+    color: var(--secondary-color);
+}   
