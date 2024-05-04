@@ -57,7 +57,6 @@ function Resumen() {
         })
         .then(response => response.json())
         .then(data => {
-            console.log(data);
             /* Example data:
             {
                 "ganancia": 0,
@@ -137,14 +136,14 @@ function Resumen() {
 
             setIngresosFijos(data.ingresos.fijos.map(ingreso => {
                 return {
-                    concepto: ingreso.descripcion,
+                    concepto: ingreso.observacion,
                     cantidad: ingreso.monto
                 }
             }));
 
             setGastosFijos(data.gastos.fijos.map(gasto => {
                 return {
-                    concepto: gasto.descripcion,
+                    concepto: gasto.obsevacion,
                     cantidad: gasto.monto
                 }
             }));

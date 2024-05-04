@@ -47,7 +47,6 @@ function Esporadicos() {
         .then((res) => res.json())
         .then((data) => {
             if (data.success) {
-                console.log("Gasto creado correctamente");
                 e.target.reset(); //limpiar formulario
                 cambiarEstadoformG(false); //cerrar formulario
                 cambiarEstadoformI(false); //cerrar formulario
@@ -130,9 +129,8 @@ function Esporadicos() {
                 </div>
                 <div className="monto-container">
                     {movimientos.map((movimiento) => {
-                        console.log(movimiento)
                         return (
-                            <div className="register">
+                            <div className="register" key={movimiento.id}>
                                 <div className="detalles">
                                     <span>{movimiento.descripcion}</span>
                                     <div className="Fecha">{movimiento.fecha} - {movimiento.detalle_pago}</div>

@@ -400,7 +400,7 @@ def get_clientes():
             pagos = IngresoFijo.query.filter_by(user=user.id).join(Fijo).join(Movimiento).filter(Movimiento.fecha >= datetime(year, 1, 1), Movimiento.fecha <= datetime(year, 12, 31)).all()
 
             print(pagos)
-            
+         
             for cliente in clientes:
                 cliente['pagos'] = []
                 for pago in pagos:
@@ -554,16 +554,37 @@ def delete_cliente(id):
 # RUTAS DE GESTIÓN DE DEBERES .........................................................................................
 
 @app.route('/deber', methods=['GET'])
+@jwt_required()
 def get_deber():
     try:
-        user = getUser()
+        user = getUser(get_jwt_identity())
+
+        # queries args
+        args = request.args
+
 
         deberes = Deber.query.filter_by(user=user.id).all()
 
         deberes = [{'id': deber.id, 'detalle': deber.detalle, 'descripcion': deber.descripcion, 'fecha_inicio': deber.fecha_inicio, 'repeticion': deber.repeticion} for deber in deberes]
 
+        if 'year' in args:
+            year = int(args['year'])
+
+            for deber in deberes:
+                deber['pagos'] = []
+                pagos = GastoFijo.query.filter_by(user=user.id).join(Fijo).join(Movimiento).filter(Movimiento.fecha >= datetime(year, 1, 1), Movimiento.fecha <= datetime(year, 12, 31)).all()
+
+                for pago in pagos:
+                    if deber['id'] == pago.deber_id:
+                        deber['pagos'].append(pago.serialize())
+                
+        else:
+            for deber in deberes:
+                deber['pagos'] = None
+
         return jsonify({'success': True, 'deberes': deberes})
-    except:
+    except Exception as e:
+        print(e)
         abort(500)
 
 
@@ -574,7 +595,7 @@ def add_deber():
     campos = ['detalle', 'descripcion', 'fecha_inicio', 'repeticion']
 
     try:
-        user = getUser()
+        user = getUser(get_jwt_identity())
 
         try:
             data = request.get_json()
@@ -590,7 +611,7 @@ def add_deber():
             id=str(uuid4()),
             detalle=data['detalle'],
             descripcion=data['descripcion'],
-            fecha_inicio=data['fecha_inicio'],
+            fecha_inicio=datetime.strptime(data['fecha_inicio'], '%Y-%m-%d'),
             repeticion=data['repeticion'],
             user=user.id
         )
@@ -599,7 +620,8 @@ def add_deber():
         db.session.commit()
 
         return jsonify({'success': True, 'message': 'Deber agregado exitosamente'})
-    except:
+    except Exception as e:
+        print(e)
         abort(500)
 
 
@@ -819,7 +841,7 @@ def add_fijo(tipo):
         return jsonify({'success': False, 'message': 'El tipo de movimiento fijo debe ser "ingreso" o "gasto"'}), 400
 
     try:
-        user = getUser()
+        user = getUser(get_jwt_identity())
 
         try:
             data = request.get_json()
@@ -830,6 +852,12 @@ def add_fijo(tipo):
 
         if len(errors) > 0:
             return basicError(errors)
+        
+        # parsear fecha
+        try:
+            data['fecha'] = datetime.strptime(data['fecha'], '%Y-%m-%d')
+        except:
+            return jsonify({'success': False, 'errors': ['El campo "fecha" debe tener el formato "YYYY-MM-DD"']}), 400
         
         movimiento = Movimiento(
             id=str(uuid4()),

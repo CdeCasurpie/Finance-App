@@ -142,6 +142,9 @@
 .fijos-container h2 {
     grid-area: title;
     margin: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
 .months-header {
@@ -268,3 +271,27 @@
     width: 100%;
     background-color: var(--background-color);
 }
+
+.fijos-container h2 button {
+    background-color: var(--card-color);
+    border: 1px solid var(--primary-color);
+    padding: 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.fijos-container h2 button:hover {
+    background-color: var(--primary-color);
+    transition: all 0.3s;
+}
+
+.client-paied-month {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    border-radius: 10px;
+    border: 1px solid var(--primary-color);
+}
+
