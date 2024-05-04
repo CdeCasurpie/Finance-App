@@ -3,7 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
 from uuid import uuid4
 from flask_cors import CORS
-from datetime import datetime
+from datetime import datetime, timedelta
 
 # INICIALIZACIÓN DE LA APLICACIÓN ========================================================================================
 
@@ -14,33 +14,12 @@ db = SQLAlchemy(app)
 
 # Configuración de JWT
 app.config['JWT_SECRET_KEY'] = 'esternocleidomastoideo'
+app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(days=7)
 
 jwt = JWTManager(app)
 
 # Configuración de CORS
 CORS(app, resources={r"/*": {"origins": "*"}})
-
-
-# DECORADORES ============================================================================================================
-# crear decorador para verificar si se requiere que el usuario sea user y no espectador
-def user_required(fn):
-    def wrapper(*args, **kwargs):
-        try:
-            current_user = get_jwt_identity()
-            model = current_user['model']
-            
-            if model != 'user':
-                return jsonify({'success': False, 'message': 'No autorizado'}), 401
-        except Exception as e:
-            print(e)
-            if e == 'Signature has expired':
-                return jsonify({'success': False, 'message': 'Token expirado'}), 401
-            else:
-                return jsonify({'success': False, 'message': 'Token inválido'}), 401
-        
-        return fn(*args, **kwargs)
-            
-    return wrapper
 
 
 def generate_invitation_code():
@@ -393,7 +372,6 @@ def login_espectador():
         abort(500)
 
 
-
 # RUTAS DE GESTIÓN DE CLIENTES .........................................................................................
 
 
@@ -445,7 +423,6 @@ def get_clientes():
 
 @app.route('/cliente', methods=['POST'])
 @jwt_required()
-@user_required
 def add_cliente():
     campos = ['nombre', 'telefono', 'direccion', 'fecha_instalacion', 'sede', 'paquete', 'login', 'caja', 'borne', 'status', 'monto', 'iptv']
 
@@ -513,9 +490,9 @@ def get_cliente(id):
         abort(500)
 
 
-@jwt_required()
-@user_required
+
 @app.route('/cliente/<id>', methods=['PUT'])
+@jwt_required()
 def update_cliente(id):
     campos = ['nombre', 'telefono', 'direccion', 'fecha_instalacion', 'sede', 'paquete', 'login', 'caja', 'borne', 'status', 'monto', 'iptv']
 
@@ -552,9 +529,8 @@ def update_cliente(id):
         abort(500)
 
 
-@jwt_required()
-@user_required
 @app.route('/cliente/<id>', methods=['DELETE'])
+@jwt_required()
 def delete_cliente(id):
     try:
         user = getUser()
@@ -576,7 +552,7 @@ def delete_cliente(id):
 
 
 # RUTAS DE GESTIÓN DE DEBERES .........................................................................................
-@jwt_required()
+
 @app.route('/deber', methods=['GET'])
 def get_deber():
     try:
@@ -591,9 +567,9 @@ def get_deber():
         abort(500)
 
 
-@jwt_required()
-@user_required
+
 @app.route('/deber', methods=['POST'])
+@jwt_required()
 def add_deber():
     campos = ['detalle', 'descripcion', 'fecha_inicio', 'repeticion']
 
@@ -627,8 +603,8 @@ def add_deber():
         abort(500)
 
 
-@jwt_required()
 @app.route('/deber/<id>', methods=['GET'])
+@jwt_required()
 def get_deber_id(id):
     try:
         user = getUser()
@@ -646,9 +622,9 @@ def get_deber_id(id):
         abort(500)
 
 
-@jwt_required()
-@user_required
+
 @app.route('/deber/<id>', methods=['PUT'])
+@jwt_required()
 def update_deber(id):
     campos = ['detalle', 'descripcion', 'fecha_inicio', 'repeticion']
 
@@ -686,8 +662,8 @@ def update_deber(id):
         abort(500)
 
 
-@jwt_required()
 @app.route('/deber/<id>', methods=['DELETE'])
+@jwt_required()
 def delete_deber(id):
     try:
         user = getUser()
@@ -709,12 +685,12 @@ def delete_deber(id):
 
 
 # RUTAS DE GESTIÓN DE MOVIMIENTOS .....................................................................................
-@jwt_required()
 @app.route('/movimiento', methods=['GET'])
+@jwt_required()
 def get_movimientos():
     try:
         arguments = request.args
-        user = getUser()
+        user = getUser(get_jwt_identity())
 
         gastos = {
             # esporadicos debe tener como tipo 'gasto'
@@ -727,13 +703,17 @@ def get_movimientos():
         }
 
         # Obtener el año donde se realizaron los movimientos
-        anio = Movimiento.query.filter_by(user=user.id).order_by(Movimiento.fecha.desc()).first().fecha.year
+        anio = Movimiento.query.filter_by(user=user.id).order_by(Movimiento.fecha.desc()).first().fecha
+        anio = int(datetime.strptime(str(anio), '%Y-%m-%d %H:%M:%S').year)
+
 
         if 'anio' in arguments:
-            anio = arguments['anio']
+            anio = int(arguments['anio'])
+
 
         # para los esporadicos distribuir entre ganancias y gastos
-        esporadicos = Esporadico.query.filter_by(user=user.id).join(Movimiento).filter(Movimiento.fecha.year == anio).all()
+        esporadicos = Esporadico.query.filter_by(user=user.id).join(Movimiento).filter(Movimiento.fecha >= datetime(anio, 1, 1), Movimiento.fecha <= datetime(anio, 12, 31)).all()
+        print("esp:", esporadicos)
 
         for esporadico in esporadicos:
             if esporadico.tipo == 'ingreso':
@@ -742,8 +722,8 @@ def get_movimientos():
                 gastos['esporadicos'].append(esporadico.serialize())
 
         # para los fijos solo consultar los gastos y los ingresos
-        gastos_fijos = GastoFijo.query.filter_by(user=user.id).join(Fijo).join(Movimiento).filter(Movimiento.fecha.year == anio).all()
-        ingresos_fijos = IngresoFijo.query.filter_by(user=user.id).join(Fijo).join(Movimiento).filter(Movimiento.fecha.year == anio).all()
+        gastos_fijos = GastoFijo.query.filter_by(user=user.id).join(Fijo).join(Movimiento).filter(Movimiento.fecha >= datetime(anio, 1, 1), Movimiento.fecha <= datetime(anio, 12, 31)).all()
+        ingresos_fijos = IngresoFijo.query.filter_by(user=user.id).join(Fijo).join(Movimiento).filter(Movimiento.fecha >= datetime(anio, 1, 1), Movimiento.fecha <= datetime(anio, 12, 31)).all()
 
         # serializar los movimientos
         gastos['fijos'] = [gasto.serialize() for gasto in gastos_fijos]
@@ -767,14 +747,13 @@ def get_movimientos():
         abort(500)
 
 
-@jwt_required()
-@user_required
 @app.route('/movimiento/esporadico', methods=['POST'])
+@jwt_required()
 def add_esporadico():
     campos = ['tipo', 'descripcion', 'detalle_pago', 'fecha', 'monto']
 
     try:
-        user = getUser()
+        user = getUser(get_jwt_identity())
 
         try:
             data = request.get_json()
@@ -791,7 +770,7 @@ def add_esporadico():
         
         movimiento = Movimiento(
             id=str(uuid4()),
-            fecha=data['fecha'],
+            fecha=datetime.strptime(data['fecha'], '%Y-%m-%d'),
             monto=data['monto'],
             user=user.id
         )
@@ -810,13 +789,29 @@ def add_esporadico():
         db.session.commit()
 
         return jsonify({'success': True, 'message': 'Movimiento esporadico agregado exitosamente'})
-    except:
+    except Exception as e:
+        print(e)
         abort(500)
 
 
+@app.route('/movimiento/esporadico', methods=['GET'])
 @jwt_required()
-@user_required
+def get_esporadicos():
+    try:
+        user = getUser(get_jwt_identity())
+
+        esporadicos = Esporadico.query.filter_by(user=user.id).all()
+
+        esporadicos = [esporadico.serialize() for esporadico in esporadicos]
+
+        return jsonify({'success': True, 'esporadicos': esporadicos})
+    except Exception as e:
+        print(e)
+        abort(500)
+
+
 @app.route('/movimiento/fijo/<tipo>', methods=['POST'])
+@jwt_required()
 def add_fijo(tipo):
     campos = ['numero_operacion', 'observacion', 'fecha', 'monto']
     
@@ -901,8 +896,8 @@ def add_fijo(tipo):
         abort(500)
 
 
-@jwt_required()
 @app.route('/movimiento/esporadico/<id>', methods=['GET'])
+@jwt_required()
 def get_esporadico(id):
     try:
         user = getUser()

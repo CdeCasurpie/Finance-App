@@ -1,95 +1,105 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./Esporadicos.css";
-const movimientosEsporadicos = [
-  {
-    tipo: "ingreso",
-    descripcion: "Pago de cliente por servicio de diseño gráfico",
-    detalle_pago: "Transferencia bancaria",
-    fecha: "2024-04-01",
-    monto: 500,
-  },
-  {
-    tipo: "gasto",
-    descripcion: "Compra mensual de víveres en el supermercado",
-    detalle_pago: "Pago con tarjeta de débito",
-    fecha: "2024-04-05",
-    monto: 200,
-  },
-  {
-    tipo: "ingreso",
-    descripcion: "Pago de renta del apartamento",
-    detalle_pago: "Depósito bancario",
-    fecha: "2024-04-10",
-    monto: 1000,
-  },
-  {
-    tipo: "gasto",
-    descripcion: "Compra de boletos para concierto",
-    detalle_pago: "Compra en línea con tarjeta de crédito",
-    fecha: "2024-04-15",
-    monto: 150,
-  },
-  {
-    tipo: "ingreso",
-    descripcion: "Pago de cliente por servicio de diseño gráfico",
-    detalle_pago: "Transferencia bancaria",
-    fecha: "2024-04-01",
-    monto: 500,
-  },
-  {
-    tipo: "gasto",
-    descripcion: "Compra mensual de víveres en el supermercado",
-    detalle_pago: "Pago con tarjeta de débito",
-    fecha: "2024-04-05",
-    monto: 200,
-  },
-  {
-    tipo: "ingreso",
-    descripcion: "Pago de renta del apartamento",
-    detalle_pago: "Depósito bancario",
-    fecha: "2024-04-10",
-    monto: 1000,
-  },
-  {
-    tipo: "gasto",
-    descripcion: "Compra de boletos para concierto",
-    detalle_pago: "Compra en línea con tarjeta de crédito",
-    fecha: "2024-04-15",
-    monto: 150,
-  },
-];
+// const movimientosEsporadicos = [
+//     {
+//         tipo: "ingreso",
+//         descripcion: "Pago de cliente por servicio de diseño gráfico",
+//         detalle_pago: "Transferencia bancaria",
+//         fecha: "2024-04-01",
+//         monto: 500,
+//     },
+// ];
 
-console.log(movimientosEsporadicos);
 
 function Esporadicos() {
-    const [mostrarFormularioGasto, setMostrarFormularioGasto] = useState(false);
-    const [mostrarFormularioIngreso, setMostrarFormularioIngreso] = useState(false);
+    //ventanas emergentes ---------------------
     const [estadoformG, cambiarEstadoformG] = useState(false);
-    const [descripcion, setDescripcion] = useState("");
-    const [detallePago, setDetallePago] = useState("");
-    const [monto, setMonto] = useState("");
-    const toggleFormularioGasto = () => {
-        setMostrarFormularioGasto(!mostrarFormularioGasto);
-        if(mostrarFormularioIngreso){
-            setMostrarFormularioIngreso(false);
+    const [estadoformI, cambiarEstadoformI] = useState(false);
+
+    //variables de estado ---------------------
+    const [movimientos, setMovimientos] = useState([]);
+
+    //errores ---------------------
+    const [errors, setErrors] = useState([]);
+
+    const crearIngresoGasto = (e, tipo) => {
+        const descripcion = e.target[0].value;
+        const detallePago = e.target[1].value;
+        const monto = e.target[2].value;
+        const fecha = e.target[3].value;
+
+        const data = {
+            "tipo": tipo,
+            "descripcion": descripcion,
+            "detalle_pago": detallePago,
+            "fecha": fecha,
+            "monto": monto,
         }
+
+        fetch("http://localhost:5000/movimiento/esporadico", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${localStorage.getItem("token")}`,
+            },
+            body: JSON.stringify(data),
+        })
+        .then((res) => res.json())
+        .then((data) => {
+            if (data.success) {
+                console.log("Gasto creado correctamente");
+                e.target.reset(); //limpiar formulario
+                cambiarEstadoformG(false); //cerrar formulario
+                cambiarEstadoformI(false); //cerrar formulario
+                setErrors([]); //limpiar errores
+
+                //recargar movimientos
+                loadMovimientos();
+            } else {
+                if (data.errors) {
+                    setErrors(data.errors);
+                } else if (data.message) {
+                    setErrors([data.message]);
+                }
+            }
+        })
+    };
+ 
+    const loadMovimientos = () => {
+        const url = "http://localhost:5000/movimiento/esporadico";
+
+        fetch(url, {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${localStorage.getItem("token")}`,
+            },
+        })
+        .then((res) => res.json())
+        .then((data) => {
+            if (data.success) {
+                const esporadicos = data.esporadicos;
+                //ordenar por fecha 
+                esporadicos.sort((a, b) => {
+                    return new Date(b.fecha) - new Date(a.fecha);
+                });
+
+                setMovimientos(esporadicos);
+            } else {
+                if (data.errors) {
+                    setErrors(data.errors);
+                } else if (data.message) {
+                    setErrors([data.message]);
+                }
+            }
+        })
     };
 
-    const toggleFormularioIngreso = () => {
-        setMostrarFormularioIngreso(!mostrarFormularioIngreso);
-        if(mostrarFormularioGasto){
-            setMostrarFormularioGasto(false);
-        }
-    };
 
-    const handleSubmit = (event) => {
-        event.preventDefault();
-        console.log(descripcion, detallePago, monto);
-        setDescripcion("");
-        setDetallePago("");
-        setMonto("");
-        cambiarEstadoformG(false);
-    };
+    // cargar una vez
+    useEffect(() => {
+        loadMovimientos();
+    }, []);
 
     return (
         <div className="main-container">
@@ -119,22 +129,23 @@ function Esporadicos() {
                     </div>
                 </div>
                 <div className="monto-container">
-                {movimientosEsporadicos.map((movimiento) => { 
-                    console.log(movimiento)
-                    return(
-                    <div className="register">
-                        <div className="detalles">
-                            <span>{movimiento.descripcion}</span>
-                            <div className="Fecha">{movimiento.fecha} - {movimiento.detalle_pago}</div>
-                        </div>
-                        <div className="monto">
-                            <span>${movimiento.monto}</span>
-                        </div>
-                    </div>
-                )})}
+                    {movimientos.map((movimiento) => {
+                        console.log(movimiento)
+                        return (
+                            <div className="register">
+                                <div className="detalles">
+                                    <span>{movimiento.descripcion}</span>
+                                    <div className="Fecha">{movimiento.fecha} - {movimiento.detalle_pago}</div>
+                                </div>
+                                <div className="monto">
+                                    <span>${movimiento.monto}</span>
+                                </div>
+                            </div>
+                        )
+                    })}
                 </div>
-                        <div className="nuevo">
-                        <div className="gastoN">
+                <div className="nuevo">
+                    <div className="gastoN">
                         <button className="gastoB" onClick={() => {
                             cambiarEstadoformG(!estadoformG);
                             const containerOverlay = document.querySelector('.containerOverlay');
@@ -146,42 +157,74 @@ function Esporadicos() {
                         </button>
 
 
-                    {estadoformG && (
-                        <div className="overlay">
-                            <div className="containerOverlay">
-                                <div className="encabezadoOverlay">
-                                    <h2>Registrar nuevo Gasto</h2>
-                                    <button className="cerrarOverlay" onClick={() => cambiarEstadoformG(false)}>
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-x-lg" viewBox="0 0 16 16">
-                                            <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z"/>
-                                        </svg>
-                                    </button>
+                        {(estadoformG || estadoformI) && (
+                            <div className="overlay">
+                                <div className="containerOverlay">
+                                    <div className="encabezadoOverlay">
+                                        <h2>Registrar nuevo Gasto</h2>
+                                        <button className="cerrarOverlay" onClick={() => {
+                                            cambiarEstadoformG(false);
+                                            cambiarEstadoformI(false);
+                                            const containerOverlay = document.querySelector('.containerOverlay');
+                                            if (containerOverlay) {
+                                                containerOverlay.classList.remove('show');
+                                            }
+                                        } }>
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-x-lg" viewBox="0 0 16 16">
+                                                <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                    <form className="formNewG" onSubmit={ (e) => {
+                                        e.preventDefault();
+                                        if (estadoformG) {
+                                            crearIngresoGasto(e, "gasto");
+                                        } else if (estadoformI) {
+                                            crearIngresoGasto(e, "ingreso");
+                                        }
+                                    }}>
+                                        <div className="campo">
+                                            <label htmlFor="descripcion">Descripción:</label>
+                                            <input type="text" id="descripcion" required />
+                                        </div>
+                                        <div className="campo">
+                                            <label htmlFor="detallePago">Detalle de Pago:</label>
+                                            <input type="text" id="detallePago" required />
+                                        </div>
+                                        <div className="campo">
+                                            <label htmlFor="monto">Monto:</label>
+                                            <input type="number" id="monto" required />
+                                        </div>
+                                        <div className="campo">
+                                            <label htmlFor="fecha">Fecha:</label>
+                                            <input type="date" id="fecha" required />
+                                        </div>
+                                        <li>
+                                            {errors.map((error) => (
+                                                <div className="error">{error}</div>
+                                            ))}
+                                        </li>
+                                        <button type="submit">
+                                            { estadoformG && "Registrar Gasto" }
+                                            { estadoformI && "Registrar Ingreso" }
+                                        </button>
+                                    </form>
                                 </div>
-                                <form onSubmit={handleSubmit} className="formNewG">
-                                    <div className="campo">
-                                        <label htmlFor="descripcion">Descripción:</label>
-                                        <input type="text" id="descripcion" value={descripcion} onChange={e => setDescripcion(e.target.value)} />
-                                    </div>
-                                    <div className="campo">
-                                        <label htmlFor="detallePago">Detalle de Pago:</label>
-                                        <input type="text" id="detallePago" value={detallePago} onChange={e => setDetallePago(e.target.value)} />
-                                    </div>
-                                    <div className="campo">
-                                        <label htmlFor="monto">Monto:</label>
-                                        <input type="number" id="monto" value={monto} onChange={e => setMonto(e.target.value)} />
-                                    </div>
-                                    <button type="submit">Agregar Gasto</button>
-                                </form>
                             </div>
-                        </div>
-                    )}
+                        )}
+                    </div>
+                    <div className="ingresoN">
+                        <button className="ingresoB" onClick={() => {
+                            cambiarEstadoformI(!estadoformI); 
+                            const containerOverlay = document.querySelector('.containerOverlay');
+                            if (containerOverlay) {
+                                containerOverlay.classList.add('show');
+                            }
+                        }}>
+                            Nuevo Ingreso
+                        </button>
+                    </div>
                 </div>
-                <div className="ingresoN">
-                    <button className="ingresoB" onClick={() => console.log("Ingreso")}>
-                        Nuevo Ingreso
-                    </button>
-                </div>
-            </div>
             </div>
 
         </div>

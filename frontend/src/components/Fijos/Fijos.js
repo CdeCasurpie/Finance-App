@@ -3,16 +3,33 @@ import { useEffect, useState } from 'react';
 
 
 function Fijos() {
-    const [year, setYear] = useState(0);
-    const [iteratorMonth, setIteratorMonth] = useState(0);
+    //Variables de estado -------------------------------
+    const [year, setYear] = useState(0); //año actual visible
+    const [iteratorMonth, setIteratorMonth] = useState(0); //mes actual inicial visible
     const [type, setType] = useState('Ingresos');
     const [clientes, setClientes] = useState([]);
     //const [deberes, setDeberes] = useState([]);
-    const [enabled, setEnabled] = useState(false);
+
+
+    //ventanas emergentes --------------------------------
+    const [estadoformG, setVisibleCreateGasto] = useState(false);  //estado del formulario de gastos
+    const [createClientForm, setVisibleCreateClient] = useState(false); //estado del formulario de creacion de cliente
+
+    const [enabled, setEnabled] = useState(false); // false = Ingresos, true = Gastos
+    
+    //iterator month
     const thisMonth = new Date().getMonth();
     const thisYear = new Date().getFullYear();
     const months = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
 
+
+    //Logic
+
+    const handleSubmit = (event) => {
+        event.preventDefault();
+        console.log("Gasto agregado");
+        setVisibleCreateGasto(false);
+    }
 
     useEffect(() => {
         getClients(year);
@@ -174,6 +191,15 @@ function Fijos() {
                     cliente.pagos = pagos;
                 });
 
+                while(clientes.length < 5) {
+                    clientes.push({
+                        nombre: '',
+                        telefono: '',
+                        monto: null,
+                        pagos: []
+                    });
+                }
+
                 console.log(clientes);
                 setClientes(clientes);
             }
@@ -181,25 +207,20 @@ function Fijos() {
         .catch(error => console.log(error));
     }
 
-    const createClient = () => {
+    const createClient = (evenet) => {
+        evenet.preventDefault();
+
         const url = 'http://localhost:5000/cliente'
 
-        let datain = {}
-        const campos = ['nombre', 'telefono', 'direccion', 'fecha_instalacion', 'sede', 'paquete', 'login', 'caja', 'borne', 'status', 'monto', 'iptv']
+
+        const form = evenet.target;
+        const datain = {};
+        const campos = ['nombre', 'telefono', 'direccion', 'fecha_instalacion', 'sede', 'paquete', 'login', 'caja', 'borne', 'status', 'monto', 'iptv'];
 
         for (let campo of campos) {
-            //generar aleatorio
-            datain[campo] = Math.random().toString(36).substring(7);
+            datain[campo] = form[campo].value;
         }
 
-        datain['fecha_instalacion'] = '2024-02-01'
-        datain['status'] = 'True'
-
-        const camposNumericos = ['monto', 'iptv', 'caja', 'borne']
-
-        for (let campo of camposNumericos) {
-            datain[campo] = Math.floor(Math.random() * 1000);
-        }
 
         fetch(url, {
             method: 'POST',
@@ -213,6 +234,8 @@ function Fijos() {
         .then(data => {
             if (data.success) {
                 getClients(year);
+                setVisibleCreateClient(false);
+                form.reset();
             } else {
                 console.log(data);
             }
@@ -258,7 +281,7 @@ function Fijos() {
                         Ingresos {year}
                         <button className='arrow-button' onClick={backMonth}>{'<'}</button>
                         <button className='arrow-button' onClick={advanceMonth}>{'>'}</button>
-                        <button className='add-button' onClick={createClient}>+</button>
+                        <button className='add-button' onClick={setVisibleCreateClient}>+</button>
                     </h2>
                     <div className='months-header'>
                         <div className={`month ${iteratorMonth === thisMonth && year === thisYear ? 'actual' : ''}`}>{months[iteratorMonth]}</div>
@@ -276,16 +299,30 @@ function Fijos() {
                                 </div>
                                 <div className='client-months'>
                                     { [0, 1, 2].map(i => {
-                                        const luegoDeInscripcion = new Date(cliente.fecha_instalacion).getMonth() === i + iteratorMonth && new Date(cliente.fecha_instalacion).getFullYear() === year;
-                                        if (cliente.pagos[i] === null && !(luegoDeInscripcion)) {
-                                            // si la fecha es mayor a la actual, se pone un None
-                                            if (i + iteratorMonth > thisMonth && year === thisYear
-                                                || year > thisYear) {
-                                                return <div className='client-month'></div>
+                                    
+                                        //si se debe mostrar alguna información (despues de inscripcion 
+                                        // y antes o igual a hoy) se muestra el pago o pendiente
+
+                                        //si no se debe mostrar, se muestra un espacio en blanco
+
+                                        const yearInScreen = year; //fecha actual
+                                        const monthInScreen = iteratorMonth + i;
+                                        const inscriptionYear = new Date(cliente.fecha_instalacion).getFullYear(); //fecha de inscripcion
+                                        const inscriptionMonth = new Date(cliente.fecha_instalacion).getMonth();
+                                        const todaysYear = new Date().getFullYear(); //fecha actual
+                                        const todaysMonth = new Date().getMonth();
+
+                                        const despuesDeInscripcion = yearInScreen > inscriptionYear || (yearInScreen === inscriptionYear && monthInScreen >= inscriptionMonth);
+                                        const antesOIgualAHoy = yearInScreen < todaysYear || (yearInScreen === todaysYear && monthInScreen <= todaysMonth);
+
+                                        if (despuesDeInscripcion && antesOIgualAHoy) {
+                                            if (cliente.pagos[i] === null) {
+                                                return <div className='client-month pending-month'>Pendiente</div>
+                                            } else {
+                                                return <div className='client-month'>{cliente.pagos[i]}</div>
                                             }
-                                            return <div className='client-month pending-month'>Pendiente</div>
-                                        } else { 
-                                            return <div className='client-month'>{cliente.pagos[i]}</div>
+                                        } else {
+                                            return <div className='client-month'></div>
                                         }
                                     })}
                                 </div>
@@ -368,7 +405,135 @@ function Fijos() {
                     </div>
                 </div>
             )}
+
+                    {estadoformG && (
+                        <div className="overlay">
+                            <div className="containerOverlay">
+                                <div className="encabezadoOverlay">
+                                    <h2>Registrar nuevo Gasto</h2>
+                                    <button className="cerrarOverlay" onClick={() => setVisibleCreateGasto(false)}>
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-x-lg" viewBox="0 0 16 16">
+                                            <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z"/>
+                                        </svg>
+                                    </button>
+                                </div>
+                                <form onSubmit={handleSubmit} className="formNewG">
+                                    <div style={{
+                                        display: 'flex',
+                                        flexDirection: 'column',
+                                        width: '100%',
+                                        gap: '1rem'
+                                    }}>
+                                        <button type='submit' className='button-gasto'>Guardar</button>
+                                        <button className='button-gasto' style={
+                                            {
+                                                backgroundColor: 'red'
+                                            }
+                                        }
+                                        onClick={() => setVisibleCreateGasto(false)}
+                                        >Cancelar</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    )}
+
+                    {createClientForm && (
+                        <div className="overlay">
+                        <div className="containerOverlay">
+                            <div className="encabezadoOverlay">
+                                <h2>Registrar nuevo Gasto</h2>
+                                <button className="cerrarOverlay" onClick={() => setVisibleCreateClient(false)}>
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-x-lg" viewBox="0 0 16 16">
+                                        <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z"/>
+                                    </svg>
+                                </button>
+                            </div>
+                            <form onSubmit={createClient} className="formNewG">
+                                {/* 'nombre', 'telefono', 'direccion', 'fecha_instalacion', 'sede', 'paquete', 'login', 'caja', 'borne', 'status', 'monto', 'iptv'] */}
+                                <div className="campo">
+                                    <label htmlFor="nombre">Nombre:</label>
+                                    <input type="text" id="nombre" placeholder='Nombre' required />
+                                </div>
+
+                                <div className="campo">
+                                    <label htmlFor="telefono">Telefono:</label>
+                                    <input type="text" id="telefono" placeholder='Telefono' required />
+                                </div>
+
+                                <div className="campo">
+                                    <label htmlFor="direccion">Direccion:</label>
+                                    <input type="text" id="direccion" placeholder='Direccion' required />
+                                </div>
+
+                                <div className="campo">
+                                    <label htmlFor="fecha_instalacion">Fecha de Instalacion:</label>
+                                    <input type="date" id="fecha_instalacion" placeholder='Fecha de Instalacion' required />
+                                </div>
+
+                                <div className="campo">
+                                    <label htmlFor="sede">Sede:</label>
+                                    <input type="text" id="sede" placeholder='Sede' required />
+                                </div>
+
+                                <div className="campo">
+                                    <label htmlFor="paquete">Paquete:</label>
+                                    <input type="text" id="paquete" placeholder='Paquete' required />
+                                </div>
+
+                                <div className="campo">
+                                    <label htmlFor="login">Login:</label>
+                                    <input type="text" id="login" placeholder='Login' required />
+                                </div>
+
+                                <div className="campo">
+                                    <label htmlFor="caja">Caja:</label>
+                                    <input type="number" id="caja" placeholder='Caja' required />
+                                </div>
+
+                                <div className="campo">
+                                    <label htmlFor="borne">Borne:</label>
+                                    <input type="number" id="borne" placeholder='Borne' required />
+                                </div>
+
+                                <div className="campo">
+                                    <label htmlFor="status">Status:</label>
+                                    <input type="text" id="status" placeholder='Status' required />
+                                </div>
+
+                                <div className="campo">
+                                    <label htmlFor="monto">Monto:</label>
+                                    <input type="number" id="monto" placeholder='Monto' required />
+                                </div>
+
+                                <div className="campo">
+                                    <label htmlFor="iptv">IPTV:</label>
+                                    <input type="number" id="iptv" placeholder='IPTV' required />
+                                </div>
+
+                                <div style={{
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    width: '100%',
+                                    gap: '1rem'
+                                }}>
+                                    <button type='submit' className='button-gasto'>Crear Cliente</button>
+                                    <button className='button-gasto' style={
+                                        {
+                                            backgroundColor: 'red'
+                                        }
+                                    }
+                                    onClick={() => setVisibleCreateClient(false)}
+                                    >Cancelar</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                    )}
+
         </div>
+
+        
     );
 }
 

@@ -136,6 +136,7 @@
     grid-template-areas: 
         "title months"
         "clients clients";
+
 }
 
 .fijos-container h2 {
@@ -193,6 +194,7 @@
     display: grid;
     grid-template-columns: 25% 75%;
     margin-bottom: 15px;
+    grid-template-rows: 65px;
 }
 
 .client-months {
@@ -214,10 +216,15 @@
 }
 
 .pending-month {
-    border: 2px solid var(--danger-color-transparent);
-    color: var(--danger-color);
+    border: 2px solid var(--primary-color);
     background-color: var(--card-color);
-    box-shadow: 0 0 5px var(--danger-color-transparent);
+    opacity: 0.6;
+}
+
+.pending-month:hover {
+    background-color: var(--primary-color);
+    color: var(--card-color);
+    opacity: 1;
 }
 
 .client-data {
@@ -239,4 +246,25 @@
 
 .client-data .client-value {
     text-align: right;
+}
+
+
+.create-client-container {
+    display: grid;
+    width: 100%;
+    grid-template-columns: 25% 75%;
+}
+
+.create-client-container .create-client-button {
+    display: flex;
+    width: 100%;
+    justify-content: center;
+    align-items: center;
+    padding: 10px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin: 0 10px;
+    width: 100%;
+    background-color: var(--background-color);
 }
