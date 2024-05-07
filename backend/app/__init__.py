@@ -475,7 +475,7 @@ def add_cliente():
 @jwt_required()
 def get_cliente(id):
     try:
-        user = getUser()
+        user = getUser(get_jwt_identity())
 
         cliente = Cliente.query.filter_by(id=id).first()
 
@@ -497,7 +497,7 @@ def update_cliente(id):
     campos = ['nombre', 'telefono', 'direccion', 'fecha_instalacion', 'sede', 'paquete', 'login', 'caja', 'borne', 'status', 'monto', 'iptv']
 
     try:
-        user = getUser()
+        user = getUser(get_jwt_identity())
 
         try:
             data = request.get_json()
@@ -533,7 +533,7 @@ def update_cliente(id):
 @jwt_required()
 def delete_cliente(id):
     try:
-        user = getUser()
+        user = getUser(get_jwt_identity())
 
         cliente = Cliente.query.filter_by(id=id).first()
 
@@ -629,7 +629,7 @@ def add_deber():
 @jwt_required()
 def get_deber_id(id):
     try:
-        user = getUser()
+        user = getUser(get_jwt_identity())
 
         deber = Deber.query.filter_by(id=id).first()
 
@@ -651,7 +651,7 @@ def update_deber(id):
     campos = ['detalle', 'descripcion', 'fecha_inicio', 'repeticion']
 
     try:
-        user = getUser()
+        user = getUser(get_jwt_identity())
 
         try:
             data = request.get_json()
@@ -688,7 +688,7 @@ def update_deber(id):
 @jwt_required()
 def delete_deber(id):
     try:
-        user = getUser()
+        user = getUser(get_jwt_identity())
 
         deber = Deber.query.filter_by(id=id).first()
 
@@ -725,8 +725,11 @@ def get_movimientos():
         }
 
         # Obtener el año donde se realizaron los movimientos
-        anio = Movimiento.query.filter_by(user=user.id).order_by(Movimiento.fecha.desc()).first().fecha
-        anio = int(datetime.strptime(str(anio), '%Y-%m-%d %H:%M:%S').year)
+        anio = Movimiento.query.filter_by(user=user.id).order_by(Movimiento.fecha.desc()).first()
+        if anio is None:
+            anio = datetime.now().year
+        else:
+            anio = int(datetime.strptime(str(anio.fecha), '%Y-%m-%d %H:%M:%S').year)
 
 
         if 'anio' in arguments:
@@ -928,7 +931,7 @@ def add_fijo(tipo):
 @jwt_required()
 def get_esporadico(id):
     try:
-        user = getUser()
+        user = getUser(get_jwt_identity())
 
         esporadico = Esporadico.query.filter_by(id=id).first()
 
@@ -943,6 +946,17 @@ def get_esporadico(id):
         abort(500)
 
 
+
+@app.route('/codigo-invitacion', methods=['GET'])
+@jwt_required()
+def get_invitation_code():
+    try:
+        user = getUser(get_jwt_identity())
+
+        return jsonify({'success': True, 'invitation_code': user.espectator_code})
+    except Exception as e:
+        print(e)
+        abort(500)
 
 
 

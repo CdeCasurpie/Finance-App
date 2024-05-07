@@ -74,6 +74,7 @@ function LoginRegister(){
         .then(data => {
             if(data.success){
                 localStorage.setItem('token', data.access_token);
+                localStorage.setItem('espectador', 'false');
                 goHome();
             } else {
                 setError(data.errors);
@@ -166,6 +167,7 @@ function LoginRegister(){
         .then(data => {
             if(data.success){
                 localStorage.setItem('token', data.access_token);
+                localStorage.setItem('espectador', 'true');
                 goHome();
             } else {
                 setError(data.errors);

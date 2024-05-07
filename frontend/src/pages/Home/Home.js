@@ -6,7 +6,22 @@ import Resumen from '../../components/Resumen/Resumen';
 import Fijos from '../../components/Fijos/Fijos';
 import Esporadicos from '../../components/Esporadicos/Esporadicos';
 
+import React from 'react';
+
 function Home () {
+
+  const [spectator, setSpectator] = React.useState(false);
+
+  //ejecutado 200ms despues de cargar la pagina
+  setTimeout(() => {
+    console.log(localStorage.getItem('espectador'));
+    if (localStorage.getItem('espectador') === 'true') {
+      setSpectator(true);
+    } else {
+      setSpectator(false);
+    }
+  }, 200);
+
 
   let token = localStorage.getItem('token');
   if(!token){
@@ -42,13 +57,13 @@ function Home () {
 
       <main>
         <section id="resumen" className='slide-out' style={{display: 'none'}}>
-          <Resumen />
+          <Resumen spectator={spectator}/>
         </section>
         <section id="fijos" className='slide-out' style={{display: 'none'}}>
-          <Fijos />
+          <Fijos spectator={spectator}/>
         </section>
         <section id="esporadicos" className='slide-out' style={{display: 'none'}}>
-          <Esporadicos />
+          <Esporadicos spectator={spectator}/>
         </section>
       </main>
       <Navbar setSection={selectSection}/>

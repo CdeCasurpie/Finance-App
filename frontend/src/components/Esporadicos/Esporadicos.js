@@ -11,7 +11,8 @@ import "./Esporadicos.css";
 // ];
 
 
-function Esporadicos() {
+function Esporadicos({ spectator }) {
+    console.log(spectator);
     //ventanas emergentes ---------------------
     const [estadoformG, cambiarEstadoformG] = useState(false);
     const [estadoformI, cambiarEstadoformI] = useState(false);
@@ -130,7 +131,7 @@ function Esporadicos() {
                 <div className="monto-container">
                     {movimientos.map((movimiento) => {
                         return (
-                            <div className="register" key={movimiento.id}>
+                            <div className={`register tipo-${movimiento.tipo}`} key={movimiento.id}>
                                 <div className="detalles">
                                     <span>{movimiento.descripcion}</span>
                                     <div className="Fecha">{movimiento.fecha} - {movimiento.detalle_pago}</div>
@@ -142,88 +143,91 @@ function Esporadicos() {
                         )
                     })}
                 </div>
-                <div className="nuevo">
-                    <div className="gastoN">
-                        <button className="gastoB" onClick={() => {
-                            cambiarEstadoformG(!estadoformG);
-                            const containerOverlay = document.querySelector('.containerOverlay');
-                            if (containerOverlay) {
-                                containerOverlay.classList.add('show');
-                            }
-                        }}>
-                            Nuevo Gasto
-                        </button>
+                { !spectator && (
+                    <div className="nuevo">
+                        <div className="gastoN">
+                            <button className="gastoB" onClick={() => {
+                                cambiarEstadoformG(!estadoformG);
+                                const containerOverlay = document.querySelector('.containerOverlay');
+                                if (containerOverlay) {
+                                    containerOverlay.classList.add('show');
+                                }
+                            }}>
+                                Nuevo Gasto
+                            </button>
 
 
-                        {(estadoformG || estadoformI) && (
-                            <div className="overlay">
-                                <div className="containerOverlay">
-                                    <div className="encabezadoOverlay">
-                                        <h2>Registrar nuevo Gasto</h2>
-                                        <button className="cerrarOverlay" onClick={() => {
-                                            cambiarEstadoformG(false);
-                                            cambiarEstadoformI(false);
-                                            const containerOverlay = document.querySelector('.containerOverlay');
-                                            if (containerOverlay) {
-                                                containerOverlay.classList.remove('show');
+                            {(estadoformG || estadoformI) && (
+                                <div className="overlay">
+                                    <div className="containerOverlay">
+                                        <div className="encabezadoOverlay">
+                                            <h2>Registrar nuevo Gasto</h2>
+                                            <button className="cerrarOverlay" onClick={() => {
+                                                cambiarEstadoformG(false);
+                                                cambiarEstadoformI(false);
+                                                const containerOverlay = document.querySelector('.containerOverlay');
+                                                if (containerOverlay) {
+                                                    containerOverlay.classList.remove('show');
+                                                }
+                                            } }>
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-x-lg" viewBox="0 0 16 16">
+                                                    <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z" />
+                                                </svg>
+                                            </button>
+                                        </div>
+                                        <form className="formNewG" onSubmit={ (e) => {
+                                            e.preventDefault();
+                                            if (estadoformG) {
+                                                crearIngresoGasto(e, "gasto");
+                                            } else if (estadoformI) {
+                                                crearIngresoGasto(e, "ingreso");
                                             }
-                                        } }>
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-x-lg" viewBox="0 0 16 16">
-                                                <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z" />
-                                            </svg>
-                                        </button>
+                                        }}>
+                                            <div className="campo">
+                                                <label htmlFor="descripcion">Descripción:</label>
+                                                <input type="text" id="descripcion" required />
+                                            </div>
+                                            <div className="campo">
+                                                <label htmlFor="detallePago">Detalle de Pago:</label>
+                                                <input type="text" id="detallePago" required />
+                                            </div>
+                                            <div className="campo">
+                                                <label htmlFor="monto">Monto:</label>
+                                                <input type="number" id="monto" required />
+                                            </div>
+                                            <div className="campo">
+                                                <label htmlFor="fecha">Fecha:</label>
+                                                <input type="date" id="fecha" required />
+                                            </div>
+                                            <li>
+                                                {errors.map((error) => (
+                                                    <div className="error">{error}</div>
+                                                ))}
+                                            </li>
+                                            <button type="submit">
+                                                { estadoformG && "Registrar Gasto" }
+                                                { estadoformI && "Registrar Ingreso" }
+                                            </button>
+                                        </form>
                                     </div>
-                                    <form className="formNewG" onSubmit={ (e) => {
-                                        e.preventDefault();
-                                        if (estadoformG) {
-                                            crearIngresoGasto(e, "gasto");
-                                        } else if (estadoformI) {
-                                            crearIngresoGasto(e, "ingreso");
-                                        }
-                                    }}>
-                                        <div className="campo">
-                                            <label htmlFor="descripcion">Descripción:</label>
-                                            <input type="text" id="descripcion" required />
-                                        </div>
-                                        <div className="campo">
-                                            <label htmlFor="detallePago">Detalle de Pago:</label>
-                                            <input type="text" id="detallePago" required />
-                                        </div>
-                                        <div className="campo">
-                                            <label htmlFor="monto">Monto:</label>
-                                            <input type="number" id="monto" required />
-                                        </div>
-                                        <div className="campo">
-                                            <label htmlFor="fecha">Fecha:</label>
-                                            <input type="date" id="fecha" required />
-                                        </div>
-                                        <li>
-                                            {errors.map((error) => (
-                                                <div className="error">{error}</div>
-                                            ))}
-                                        </li>
-                                        <button type="submit">
-                                            { estadoformG && "Registrar Gasto" }
-                                            { estadoformI && "Registrar Ingreso" }
-                                        </button>
-                                    </form>
                                 </div>
-                            </div>
-                        )}
+                            )}
+                        </div>
+                        <div className="ingresoN">
+                            <button className="ingresoB" onClick={() => {
+                                cambiarEstadoformI(!estadoformI); 
+                                const containerOverlay = document.querySelector('.containerOverlay');
+                                if (containerOverlay) {
+                                    containerOverlay.classList.add('show');
+                                }
+                            }}>
+                                Nuevo Ingreso
+                            </button>
+                        </div>
                     </div>
-                    <div className="ingresoN">
-                        <button className="ingresoB" onClick={() => {
-                            cambiarEstadoformI(!estadoformI); 
-                            const containerOverlay = document.querySelector('.containerOverlay');
-                            if (containerOverlay) {
-                                containerOverlay.classList.add('show');
-                            }
-                        }}>
-                            Nuevo Ingreso
-                        </button>
-                    </div>
-                </div>
+                )}
             </div>
+            
 
         </div>
     );

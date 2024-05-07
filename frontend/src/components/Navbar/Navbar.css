@@ -79,7 +79,8 @@
 
 .navbar {
     display: grid;
-    grid-template-rows: 120px repeat(3, 70px) 1fr;
+    grid-template-rows: 120px repeat(3, 70px) 1fr repeat(2, 70px);
+    grid-template-columns: 215px;
     padding: 1rem;
     background-color: var(--card-color);
     box-shadow: 50px 0 50px var(--primary-color);
@@ -127,3 +128,68 @@
         align-self: center;
     }
 }
+
+
+/* coodigo invitacion
+
+<div className='invitation-code'>
+        <button className='invitation-code-btn' onClick={() => { copyCode() }}>Copiar código</button>
+        <input type="text" value={invitationCode} readOnly />
+      </div>
+
+      */
+
+.invitation-code {
+    display: grid;
+    grid-template-columns: 30% 70%;
+    gap: 0.5rem;
+    justify-content: center;
+    padding: 0 5px 15px 5px;
+}
+
+.invitation-code-btn {
+    background: var(--primary-color);
+    color: var(--secondary-color);
+    border: 1px solid var(--primary-color);
+    border-radius: 5px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: 0.2s;
+}
+
+.invitation-code-btn:hover {
+    background: var(--secondary-color);
+    color: var(--card-color);
+    transition: 0.2s;
+}
+
+.invitation-code-btn:active {
+    background: var(--card-color);
+    color: var(--secondary-color);
+    transition: 0.2s;
+    transform: scale(0.95);
+}
+
+.invitation-code input {
+    background: var(--card-color);
+    color: var(--secondary-color);
+    border: 1px solid var(--secondary-color);
+    padding: 0 10px;
+    border-radius: 5px;
+}
+
+.invitation-code input::placeholder {
+    color: var(--secondary-color);
+}
+
+.invitation-code input:focus {
+    outline: none;
+}
+
+.invitation-code input:hover {
+    background: var(--secondary-color);
+    color: var(--card-color);
+    border: 1px solid var(--card-color);
+}
+
