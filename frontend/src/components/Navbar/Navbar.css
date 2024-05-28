@@ -79,7 +79,7 @@
 
 .navbar {
     display: grid;
-    grid-template-rows: 120px repeat(3, 70px) 1fr repeat(2, 70px);
+    grid-template-rows: 120px repeat(4, 70px) 1fr repeat(2, 70px);
     grid-template-columns: 215px;
     padding: 1rem;
     background-color: var(--card-color);

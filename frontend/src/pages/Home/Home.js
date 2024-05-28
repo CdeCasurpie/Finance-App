@@ -7,6 +7,7 @@ import Fijos from '../../components/Fijos/Fijos';
 import Esporadicos from '../../components/Esporadicos/Esporadicos';
 
 import React from 'react';
+import Clientes from '../../components/Clientes/Clientes';
 
 function Home () {
 
@@ -64,6 +65,9 @@ function Home () {
         </section>
         <section id="esporadicos" className='slide-out' style={{display: 'none'}}>
           <Esporadicos spectator={spectator}/>
+        </section>
+        <section id="clientes" className='slide-out' style={{display: 'none'}}>
+          <Clientes spectator={spectator}/>
         </section>
       </main>
       <Navbar setSection={selectSection}/>

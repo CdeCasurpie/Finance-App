@@ -440,6 +440,9 @@ def add_cliente():
         if len(errors) > 0:
             return basicError(errors)
         
+        if (data['status'] != True) and (data['status'] != False):
+            return jsonify({'success': False, 'errors': ['El campo "status" debe ser un valor booleano']})
+
         cliente = Cliente(
             id=str(uuid4()),
             nombre=data['nombre'],
@@ -527,6 +530,18 @@ def update_cliente(id):
     except Exception as e:
         print(e)
         abort(500)
+
+
+@app.route('/cliente/<id>/activar', methods=['PUT'])
+@jwt_required()
+def activar_cliente(id):
+    pass
+
+
+@app.route('/cliente/<id>/desactivar', methods=['PUT'])
+@jwt_required()
+def desactivar_cliente(id):
+    pass
 
 
 @app.route('/cliente/<id>', methods=['DELETE'])

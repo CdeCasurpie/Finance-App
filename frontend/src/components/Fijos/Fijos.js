@@ -131,6 +131,7 @@ function Fijos({spectator}) {
             datain[campo] = form[campo].value;
         }
 
+        datain['status'] = true;
 
         fetch(url, {
             method: 'POST',
@@ -591,9 +592,9 @@ function Fijos({spectator}) {
                             <input type="number" id="borne" placeholder='Borne' required />
                         </div>
 
-                        <div className="campo">
+                        <div className="campo" style={{display: 'none'}}>
                             <label htmlFor="status">Status:</label>
-                            <input type="text" id="status" placeholder='Status' required />
+                            <input type="text" id="status" placeholder='Status' />
                         </div>
 
                         <div className="campo">

@@ -1,0 +1,8 @@
+.clientes-container {
+    background-color: var(--card-color);
+    border-radius: 10px;
+    flex-grow: 1;
+    display: grid;
+    grid-template-rows: 10vh 50vh 10vh;
+    max-height: 100%;
+}

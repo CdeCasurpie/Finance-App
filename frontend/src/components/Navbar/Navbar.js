@@ -68,6 +68,7 @@ function Navbar({ setSection }) {
       <button className="navbar__button" onClick={(e) => { selectThis(e); setSection('resumen') }}>Resumen</button>
       <button className="navbar__button" onClick={(e) => { selectThis(e); setSection('fijos') }}>Fijos</button>
       <button className="navbar__button" onClick={(e) => { selectThis(e); setSection('esporadicos') }}>Esporádicos</button>
+      <button className="navbar__button" onClick={(e) => { selectThis(e); setSection('clientes') }}>Clientes</button>
       <div className="white__space"></div>
       <div className='invitation-code'>
         <button className='invitation-code-btn' onClick={(e) => { copyCode(e) }}>
