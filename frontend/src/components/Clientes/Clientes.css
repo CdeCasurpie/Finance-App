@@ -2,7 +2,145 @@
     background-color: var(--card-color);
     border-radius: 10px;
     flex-grow: 1;
-    display: grid;
-    grid-template-rows: 10vh 50vh 10vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
     max-height: 100%;
 }
+
+.clientes-searcher {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 10px;
+    padding: 20px 30px 15px 30px;
+}
+
+.clientes-searcher input {
+    margin: 10px;
+    border: 1px solid var(--primary-color);
+    background-color: var(--card-color);
+    color: var(--text-color);
+    padding: 10px 20px 10px 10px;
+    transition: 0.3s ease;
+    border-radius: 8px;
+}
+
+.clientes-list {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    align-items: flex-start;
+    gap: 10px;
+    overflow-y: auto;
+    padding: 20px;
+    max-height: 100%;
+    overflow-x: hidden;
+}
+
+.cliente-card {
+    background-color: var(--card-color);
+    border-radius: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 10px;
+    cursor: pointer;
+    width: 45%;
+}
+
+.cliente-info {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 10px;
+    border-radius: 10px;
+    width: 100%;
+}
+
+.cliente-info h2 {
+    font-size: 1.2rem;
+    width: 100%;
+    border-bottom: 1px solid var(--primary-color);
+    padding-bottom: 10px;
+}
+
+.cliente-data {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    font-size: 0.9rem;
+}
+
+.cliente-buttons {
+    display: flex;
+    gap: 10px;
+    width: 100%;
+    justify-content: flex-end;
+}
+
+.cliente-buttons button {
+    color: var(--text-color);
+    border-radius: 10px;
+    padding: 5px 10px;
+    cursor: pointer;
+    border: none;
+    transition: 0.3s ease;
+}
+
+.editar-btn {
+    color: var(--card-color);
+}
+
+.ver-btn {
+    background-color: var(--primary-color);
+    color: var(--card-color);
+}
+
+.cliente-buttons button:hover {
+    transform: scale(1.1);
+    color: var(--card-color);
+    transition: 0.3s ease;
+}
+
+.active {
+    border: 1px solid var(--primary-color);
+}
+
+.inactive {
+    border: 1px solid var(--secondary-color);
+}
+
+
+
+/* 
+<div className="clientes-container">
+    <div className="clientes-searcher">
+        <input type="text" placeholder="nombre del cliente" />
+        <input type="text" placeholder="telefono" />
+        <input type="text" placeholder="sede" />
+        <input type="text" placeholder="login" />
+    </div>
+    <div className="clientes-list">
+        {clientes.map((cliente) => (
+            <div key={cliente.id} className="cliente-card">
+                <div className={`cliente-info ${cliente.status ? 'active' : 'inactive'}`}>
+                    <h2>{cliente.nombre}</h2>
+                    <div className="cliente-data">
+                        <p>Telefono: {cliente.telefono}</p>
+                        <p>Sede: {cliente.sede}</p>
+                        <p>Login: {cliente.login}</p>
+                    </div>
+                    
+                    <div className="cliente-buttons">
+                        <button onClick={() => spectator(cliente)}>Ver</button>
+                        { !spectator  && <button onClick={() => spectator(cliente)}>Editar</button> }
+                    </div>
+                </div>
+            </div>
+        ))} 
+    </div>
+</div> 
+*/
