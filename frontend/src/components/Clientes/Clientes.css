@@ -38,6 +38,19 @@
     overflow-x: hidden;
 }
 
+/*scroll*/
+::-webkit-scrollbar {
+    width: 10px;
+}
+
+::-webkit-scrollbar-track {
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--primary-color);
+    border-radius: 10px;
+}
+
 .cliente-card {
     background-color: var(--card-color);
     border-radius: 10px;
@@ -82,8 +95,7 @@
 }
 
 .cliente-buttons button {
-    color: var(--text-color);
-    border-radius: 10px;
+    border-radius: 5px;
     padding: 5px 10px;
     cursor: pointer;
     border: none;
@@ -91,7 +103,7 @@
 }
 
 .editar-btn {
-    color: var(--card-color);
+    color: var(--primary-color);
 }
 
 .ver-btn {
@@ -144,3 +156,159 @@
     </div>
 </div> 
 */
+
+
+
+
+
+/* ventana emergente */
+
+/*
+<div className={"floating-window-container" + (showClientEdit ? " floating-window-container-visible" : "")}>
+                <div className="floating-window">
+                    <div className="floating-window-header">
+                        <h2>Editar Cliente</h2>
+                        <button onClick={() => setShowClientEdit(false)} className="close-button">X</button>
+                    </div>
+                    <form className="floating-window-content" onSubmit={(e) => {
+                        modificarCliente(clientData, e);
+                    }}>
+                        <input type="text" placeholder="Nombre" value={clientData.nombre} onChange={(e) => setClientData({ ...clientData, 'nombre': e.target.value })} />
+                        <input type="text" placeholder="Telefono" value={clientData.telefono} onChange={(e) => setClientData({ ...clientData, 'telefono': e.target.value })} />
+                        <input type="text" placeholder="Direccion" value={clientData.direccion} onChange={(e) => setClientData({ ...clientData, 'direccion': e.target.value })} />
+                        <input type="date" placeholder="Fecha de instalacion" value={clientData.fecha_instalacion} onChange={(e) => setClientData({ ...clientData, 'fecha_instalacion': e.target.value })} />
+                        <input type="text" placeholder="Sede" value={clientData.sede} onChange={(e) => setClientData({ ...clientData, 'sede': e.target.value })} />
+                        <input type="text" placeholder="Paquete" value={clientData.paquete} onChange={(e) => setClientData({ ...clientData, 'paquete': e.target.value })} />
+                        <input type="text" placeholder="Login" value={clientData.login} onChange={(e) => setClientData({ ...clientData, 'login': e.target.value })} />
+                        <input type="text" placeholder="Caja" value={clientData.caja} onChange={(e) => setClientData({ ...clientData, 'caja': e.target.value })} />
+                        <input type="text" placeholder="Borne" value={clientData.borne} onChange={(e) => setClientData({ ...clientData, 'borne': e.target.value })} />
+                        <div className="status-container">
+                            <label>Status</label>
+                            <label> {clientData.status ? 'Activo' : 'Inactivo'} </label>
+                            <input type="checkbox" value={clientData.status} onChange={(e) => setClientData({ ...clientData, 'status': e.target.checked })} />
+                        </div>
+                        <input type="text" placeholder="Monto" value={clientData.monto} onChange={(e) => setClientData({ ...clientData, 'monto': e.target.value })} />
+                        <input type="text" placeholder="IPTV" value={clientData.iptv} onChange={(e) => setClientData({ ...clientData, 'iptv': e.target.value })} />
+                        <button type="submit">Guardar</button>
+                    </form>
+                </div>
+            </div> 
+            */
+
+
+.floating-window-container {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.5);
+    justify-content: center;
+    align-items: center;
+    z-index: 100;
+}
+
+.floating-window-container-visible {
+    display: flex;
+}
+
+.floating-window {
+    width: 50%;
+    background-color: var(--card-color);
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    padding: 20px;
+    gap: 20px;
+    max-height: 80vh;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+.floating-window-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+}
+
+.close-button {
+    background-color: var(--secondary-color);
+    color: var(--card-color);
+    border: none;
+    border-radius: 10px;
+    padding: 5px 10px;
+    cursor: pointer;
+    transition: 0.3s ease;
+}
+
+.close-button:hover {
+    transform: scale(1.1);
+    transition: 0.3s ease;
+}
+
+.floating-window-content {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.floating-window-content h2 {
+    font-size: 1.5rem;
+}
+
+.floating-window-content p {
+    width: 100%;
+    text-align: left;
+    font-size: 1rem;
+}
+
+.floating-window-content input {
+    width: 100%;
+    border: 1px solid var(--primary-color);
+    background-color: var(--card-color);
+    color: var(--text-color);
+    padding: 10px 20px 10px 10px;
+    transition: 0.3s ease;
+    border-radius: 8px;
+}
+
+.status-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+}
+
+.floating-window-content button {
+    background-color: var(--primary-color);
+    color: var(--card-color);
+    border-radius: 10px;
+    padding: 10px;
+    cursor: pointer;
+    border: none;
+    transition: 0.3s ease;
+}
+
+.floating-window-content button:hover {
+    transform: scale(1.1);
+    transition: 0.3s ease;
+}
+
+
+.floating-window-buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+.floating-window-buttons button:hover {
+    transform: scale(1.1);
+    transition: 0.3s ease;
+}
+
+.floating-window-content .floating-window-buttons-submit {
+    background-color: var(--secondary-color);
+}

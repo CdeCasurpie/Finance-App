@@ -535,9 +535,9 @@ function Fijos({spectator}) {
             { /* VENTANAS EMERGENTES --------------------------------- */}
 
             {createClientForm && (
-                <div className="overlay">
-                <div className="containerOverlay">
-                    <div className="encabezadoOverlay">
+                <div className="floating-window-container floating-window-container-visible">
+                <div className="floating-window">
+                    <div className="floating-window-header">
                         <h2>Registrar nuevo Cliente</h2>
                         <button className="cerrarOverlay" onClick={() => setVisibleCreateClient(false)}>
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-x-lg" viewBox="0 0 16 16">
@@ -545,7 +545,7 @@ function Fijos({spectator}) {
                             </svg>
                         </button>
                     </div>
-                    <form onSubmit={createClient} className="formNewG">
+                    <form onSubmit={createClient} className="floating-window-content">
                         {/* 'nombre', 'telefono', 'direccion', 'fecha_instalacion', 'sede', 'paquete', 'login', 'caja', 'borne', 'status', 'monto', 'iptv'] */}
                         <div className="campo">
                             <label htmlFor="nombre">Nombre:</label>
@@ -607,18 +607,9 @@ function Fijos({spectator}) {
                             <input type="number" id="iptv" placeholder='IPTV' required />
                         </div>
 
-                        <div style={{
-                            display: 'flex',
-                            flexDirection: 'column',
-                            width: '100%',
-                            gap: '1rem'
-                        }}>
-                            <button type='submit' className='button-gasto'>Crear Cliente</button>
-                            <button className='button-gasto' style={
-                                {
-                                    backgroundColor: 'red'
-                                }
-                            }
+                        <div className="floating-window-buttons">
+                            <button type='submit' className='floating-window-buttons-submit'>Crear Cliente</button>
+                            <button
                             onClick={() => setVisibleCreateClient(false)}
                             >Cancelar</button>
                         </div>
@@ -628,9 +619,9 @@ function Fijos({spectator}) {
             )}
 
             {registerPagoForm && (
-                <div className="overlay">
-                    <div className="containerOverlay">
-                        <div className="encabezadoOverlay">
+                <div className="floating-window-container floating-window-container-visible">
+                    <div className="floating-window">
+                        <div className="floating-window-header">
                             <h2>Registrar Pago</h2>
                             <button className="cerrarOverlay" onClick={() => {
                                 setVisibleRegisterPago(false);
@@ -641,7 +632,7 @@ function Fijos({spectator}) {
                                 </svg>
                             </button>
                         </div>
-                        <form className="formNewG" onSubmit={createPago} id="new-gasto-form">
+                        <form className="floating-window-content" onSubmit={createPago} id="new-gasto-form">
                             {/* campos = ['numero_operacion', 'observacion', 'fecha', 'monto'] */}
                             <div className="campo">
                                 <label htmlFor="numero_operacion">Numero de Operacion:</label>
@@ -669,18 +660,9 @@ function Fijos({spectator}) {
                                 ))}
                             </div>
 
-                            <div style={{
-                                display: 'flex',
-                                flexDirection: 'column',
-                                width: '100%',
-                                gap: '1rem'
-                            }}>
-                                <button type='submit' className='button-gasto'>Registrar Pago</button>
-                                <button className='button-gasto' style={
-                                    {
-                                        backgroundColor: 'red'
-                                    }
-                                }
+                            <div className="floating-window-buttons">
+                                <button type='submit' className='floating-window-buttons-submit'>Registrar Pago</button>
+                                <button
                                 onClick={() => {
                                     setVisibleRegisterPago(false);
                                     setErrors([]);
@@ -695,9 +677,9 @@ function Fijos({spectator}) {
 
 
             {createDeberForm && ( 
-                <div className="overlay">
-                    <div className="containerOverlay">
-                        <div className="encabezadoOverlay">
+                <div className="floating-window-container floating-window-container-visible">
+                    <div className="floating-window">
+                        <div className="floating-window-header">
                             <h2>Registrar Nuevo Deber</h2>
                             <button className="cerrarOverlay" onClick={() => setVisibleCreateDeber(false)}>
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-x-lg" viewBox="0 0 16 16">
@@ -705,7 +687,7 @@ function Fijos({spectator}) {
                                 </svg>
                             </button>
                         </div>
-                        <form onSubmit={createDeber} className="formNewG">
+                        <form onSubmit={createDeber} className="floating-window-content">
                             {/* campos = ['detalle', 'descripcion', 'fecha_inicio', 'repeticion'] */}
                             <div className="campo">
                                 <label htmlFor="detalle">Detalle:</label>
@@ -733,18 +715,9 @@ function Fijos({spectator}) {
                                 ))}
                             </div>
 
-                            <div style={{
-                                display: 'flex',
-                                flexDirection: 'column',
-                                width: '100%',
-                                gap: '1rem'
-                            }}>
-                                <button type='submit' className='button-gasto'>Crear Deber</button>
-                                <button className='button-gasto' style={
-                                    {
-                                        backgroundColor: 'red'
-                                    }
-                                }
+                            <div className="floating-window-buttons">
+                                <button type='submit' className='floating-window-buttons-submit'>Crear Deber</button>
+                                <button
                                 onClick={() => setVisibleCreateDeber(false)}
                                 >Cancelar</button>
                             </div>
@@ -754,9 +727,9 @@ function Fijos({spectator}) {
             )}
 
             {registerGastoForm && (
-                <div className="overlay">
-                    <div className="containerOverlay">
-                        <div className="encabezadoOverlay">
+                <div className="floating-window-container floating-window-container-visible">
+                    <div className="floating-window">
+                        <div className="floating-window-header">
                             <h2>Registrar Gasto</h2>
                             <button className="cerrarOverlay" onClick={() => {
                                 setVisibleRegisterGasto(false);
@@ -767,7 +740,7 @@ function Fijos({spectator}) {
                                 </svg>
                             </button>
                         </div>
-                        <form className="formNewG" onSubmit={createGasto} id="new-gasto-form">
+                        <form className="floating-window-content" onSubmit={createGasto} id="new-gasto-form">
                             {/* campos = ['numero_operacion', 'observacion', 'fecha', 'monto'] */}
                             <div className="campo">
                                 <label htmlFor="numero_operacion">Numero de Operacion:</label>
@@ -795,19 +768,9 @@ function Fijos({spectator}) {
                                 ))}
                             </div>
 
-                            <div style={{
-                                display: 'flex',
-                                flexDirection: 'column',
-                                width: '100%',
-                                gap: '1rem'
-                            }}>
-                                <button type='submit' className='button-gasto'>Registrar Gasto</button>
-                                <button className='button-gasto' style={
-                                    {
-                                        backgroundColor: 'red'
-                                    }
-                                }
-                                onClick={() => {
+                            <div className="floating-window-buttons">
+                                <button type='submit' className='floating-window-buttons-submit'>Registrar Gasto</button>
+                                <button onClick={() => {
                                     setVisibleRegisterGasto(false);
                                     setErrors([]);
                                 }}

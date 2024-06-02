@@ -520,9 +520,18 @@ def update_cliente(id):
         elif cliente.user != user.id:
             abort(403)
         else:
-            for campo in campos:
+            for campo in campos: 
                 if campo in data:
-                    setattr(cliente, campo, data[campo])
+                    if campo == 'status':
+                        setattr(cliente, campo, bool(data[campo]))
+                    elif campo == 'caja' or campo == 'borne' or campo == 'iptv':
+                        setattr(cliente, campo, int(data[campo]))
+                    elif campo == 'monto':
+                        setattr(cliente, campo, float(data[campo]))
+                    elif campo == 'fecha_instalacion':
+                        setattr(cliente, campo, datetime.strptime(data[campo], '%Y-%m-%d'))
+                    else:
+                        setattr(cliente, campo, data[campo])
             
             db.session.commit()
 

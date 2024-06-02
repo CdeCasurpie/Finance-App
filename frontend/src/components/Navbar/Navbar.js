@@ -64,7 +64,7 @@ function Navbar({ setSection }) {
 
   return (
     <nav className="navbar">
-      <h1 className="navbar__title">BenjiOR Finanzas</h1>
+      <h1 className="navbar__title">SITEL Gestor Finanzas</h1>
       <button className="navbar__button" onClick={(e) => { selectThis(e); setSection('resumen') }}>Resumen</button>
       <button className="navbar__button" onClick={(e) => { selectThis(e); setSection('fijos') }}>Fijos</button>
       <button className="navbar__button" onClick={(e) => { selectThis(e); setSection('esporadicos') }}>Esporádicos</button>

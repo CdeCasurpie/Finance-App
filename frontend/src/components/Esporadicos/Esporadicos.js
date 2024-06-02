@@ -107,26 +107,6 @@ function Esporadicos({ spectator }) {
             <div className="esporadicos-container">
                 <div className="mov-container">
                     <span>Movimientos</span>
-                    <div className="todo-mov">
-                        <div className="ver-todo" onClick={() => console.log("Todos")}>
-                            <span onClick={() => console.log("Todo")}>Ver Todos </span>
-                        </div>
-                        <div className="mov" onClick={() => console.log("Fecha")}>
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                viewBox="0 0 24 24"
-                                fill="currentColor"
-                                className="max-w-[20px] max-w-h-[20px] fit-content"
-                                onClick={() => console.log("Fecha")}>
-                                <path d="M12.75 12.75a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM7.5 15.75a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5ZM8.25 17.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM9.75 15.75a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5ZM10.5 17.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM12 15.75a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5ZM12.75 17.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM14.25 15.75a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5ZM15 17.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM16.5 15.75a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5ZM15 12.75a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM16.5 13.5a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5Z" />
-                                <path
-                                    fillRule="evenodd"
-                                    d="M6.75 2.25A.75.75 0 0 1 7.5 3v1.5h9V3A.75.75 0 0 1 18 3v1.5h.75a3 3 0 0 1 3 3v11.25a3 3 0 0 1-3 3H5.25a3 3 0 0 1-3-3V7.5a3 3 0 0 1 3-3H6V3a.75.75 0 0 1 .75-.75Zm13.5 9a1.5 1.5 0 0 0-1.5-1.5H5.25a1.5 1.5 0 0 0-1.5 1.5v7.5a1.5 1.5 0 0 0 1.5 1.5h13.5a1.5 1.5 0 0 0 1.5-1.5v-7.5Z"
-                                    clipRule="evenodd"
-                                />
-                            </svg>
-                        </div>
-                    </div>
                 </div>
                 <div className="monto-container">
                     {movimientos.map((movimiento) => {
@@ -137,7 +117,11 @@ function Esporadicos({ spectator }) {
                                     <div className="Fecha">{movimiento.fecha} - {movimiento.detalle_pago}</div>
                                 </div>
                                 <div className="monto">
-                                    <span>${movimiento.monto}</span>
+                                    <span
+                                        style={
+                                            movimiento.tipo === "ingreso" ? {} : { color: "red" }
+                                        }
+                                    >{movimiento.tipo === "ingreso" ? "+" : "-"} ${movimiento.monto}</span>
                                 </div>
                             </div>
                         )
@@ -158,9 +142,9 @@ function Esporadicos({ spectator }) {
 
 
                             {(estadoformG || estadoformI) && (
-                                <div className="overlay">
-                                    <div className="containerOverlay">
-                                        <div className="encabezadoOverlay">
+                                <div className="floating-window-container floating-window-container-visible">
+                                    <div className="floating-window">
+                                        <div className="floating-window-header">
                                             <h2>Registrar nuevo Gasto</h2>
                                             <button className="cerrarOverlay" onClick={() => {
                                                 cambiarEstadoformG(false);
@@ -175,7 +159,7 @@ function Esporadicos({ spectator }) {
                                                 </svg>
                                             </button>
                                         </div>
-                                        <form className="formNewG" onSubmit={ (e) => {
+                                        <form className="floating-window-content" onSubmit={ (e) => {
                                             e.preventDefault();
                                             if (estadoformG) {
                                                 crearIngresoGasto(e, "gasto");
@@ -204,10 +188,12 @@ function Esporadicos({ spectator }) {
                                                     <div className="error">{error}</div>
                                                 ))}
                                             </li>
-                                            <button type="submit">
-                                                { estadoformG && "Registrar Gasto" }
-                                                { estadoformI && "Registrar Ingreso" }
-                                            </button>
+                                            <div className="floating-window-buttons">
+                                                <button type="submit" className="floating-window-buttons-submit">
+                                                    { estadoformG && "Registrar Gasto" }
+                                                    { estadoformI && "Registrar Ingreso" }
+                                                </button>
+                                            </div>
                                         </form>
                                     </div>
                                 </div>
@@ -227,8 +213,6 @@ function Esporadicos({ spectator }) {
                     </div>
                 )}
             </div>
-            
-
         </div>
     );
 }

@@ -189,7 +189,7 @@ function LoginRegister(){
             <div class="login-container">
                 <div class="title">
                     <img src={logo} alt="logo" />
-                    <h2>BenjiOr Fin</h2>
+                    <h2>SITEL {isLoggin === "login" ? "Login" : isLoggin === "register" ? "Registro" : "Espectador"}</h2>
                 </div>
                 
                 { isLoggin === "login" && (

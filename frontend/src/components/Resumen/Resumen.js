@@ -145,7 +145,7 @@ function Resumen({ spectator }) {
 
                     setGastosFijos(data.gastos.fijos.map(gasto => {
                         return {
-                            concepto: gasto.obsevacion,
+                            concepto: gasto.deber.descripcion,
                             cantidad: gasto.monto
                         }
                     }));
@@ -180,7 +180,8 @@ function Resumen({ spectator }) {
                                 return (
                                     <li key={index}>
                                         <h4>{ingreso.concepto}</h4>
-                                        <p>${ingreso.cantidad}</p>
+                                        <p style={{ color: 'green' }}
+                                        >+ ${ingreso.cantidad}</p>
                                     </li>
                                 );
                             })}
@@ -197,7 +198,8 @@ function Resumen({ spectator }) {
                                 return (
                                     <li key={index}>
                                         <h4>{gasto.concepto}</h4>
-                                        <p>${gasto.cantidad}</p>
+                                        <p style={{ color: 'red' }}
+                                        >- ${gasto.cantidad}</p>
                                     </li>
                                 );
                             })}
@@ -217,7 +219,8 @@ function Resumen({ spectator }) {
                                 return (
                                     <li key={index}>
                                         <h4>{ingreso.concepto}</h4>
-                                        <p>${ingreso.cantidad}</p>
+                                        <p style={{ color: 'green' }}
+                                        >+ ${ingreso.cantidad}</p>
                                     </li>
                                 );
                             })}
@@ -234,7 +237,8 @@ function Resumen({ spectator }) {
                                 return (
                                     <li key={index}>
                                         <h4>{gasto.concepto}</h4>
-                                        <p>${gasto.cantidad}</p>
+                                        <p style={{ color: 'red' }}
+                                        >- ${gasto.cantidad}</p>
                                     </li>
                                 );
                             })}

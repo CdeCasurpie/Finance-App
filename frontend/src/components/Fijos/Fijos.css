@@ -169,6 +169,7 @@
 
 .months-header .actual {
     background-color: var(--primary-color);
+    color: var(--card-color);
 }
 
 .clients-list-container {
@@ -221,7 +222,7 @@
 .pending-month {
     border: 2px solid var(--primary-color);
     background-color: var(--card-color);
-    opacity: 0.6;
+    opacity: 0.3;
 }
 
 .pending-month:hover {

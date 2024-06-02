@@ -1,3 +1,116 @@
+/*
+<div className="main-container">
+    <h1>Esporadicos</h1>
+    <div className="esporadicos-container">
+        <div className="mov-container">
+            <span>Movimientos</span>
+        </div>
+        <div className="monto-container">
+            {movimientos.map((movimiento) => {
+                return (
+                    <div className={`register tipo-${movimiento.tipo}`} key={movimiento.id}>
+                        <div className="detalles">
+                            <span>{movimiento.descripcion}</span>
+                            <div className="Fecha">{movimiento.fecha} - {movimiento.detalle_pago}</div>
+                        </div>
+                        <div className="monto">
+                            <span
+                                style={
+                                    movimiento.tipo === "ingreso" ? {} : { color: "red" }
+                                }
+                            >{movimiento.tipo === "ingreso" ? "+" : "-"} ${movimiento.monto}</span>
+                        </div>
+                    </div>
+                )
+            })}
+        </div>
+        { !spectator && (
+            <div className="nuevo">
+                <div className="gastoN">
+                    <button className="gastoB" onClick={() => {
+                        cambiarEstadoformG(!estadoformG);
+                        const containerOverlay = document.querySelector('.containerOverlay');
+                        if (containerOverlay) {
+                            containerOverlay.classList.add('show');
+                        }
+                    }}>
+                        Nuevo Gasto
+                    </button>
+
+
+                    {(estadoformG || estadoformI) && (
+                        <div className="overlay">
+                            <div className="containerOverlay">
+                                <div className="encabezadoOverlay">
+                                    <h2>Registrar nuevo Gasto</h2>
+                                    <button className="cerrarOverlay" onClick={() => {
+                                        cambiarEstadoformG(false);
+                                        cambiarEstadoformI(false);
+                                        const containerOverlay = document.querySelector('.containerOverlay');
+                                        if (containerOverlay) {
+                                            containerOverlay.classList.remove('show');
+                                        }
+                                    } }>
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-x-lg" viewBox="0 0 16 16">
+                                            <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z" />
+                                        </svg>
+                                    </button>
+                                </div>
+                                <form className="formNewG" onSubmit={ (e) => {
+                                    e.preventDefault();
+                                    if (estadoformG) {
+                                        crearIngresoGasto(e, "gasto");
+                                    } else if (estadoformI) {
+                                        crearIngresoGasto(e, "ingreso");
+                                    }
+                                }}>
+                                    <div className="campo">
+                                        <label htmlFor="descripcion">Descripción:</label>
+                                        <input type="text" id="descripcion" required />
+                                    </div>
+                                    <div className="campo">
+                                        <label htmlFor="detallePago">Detalle de Pago:</label>
+                                        <input type="text" id="detallePago" required />
+                                    </div>
+                                    <div className="campo">
+                                        <label htmlFor="monto">Monto:</label>
+                                        <input type="number" id="monto" required />
+                                    </div>
+                                    <div className="campo">
+                                        <label htmlFor="fecha">Fecha:</label>
+                                        <input type="date" id="fecha" required />
+                                    </div>
+                                    <li>
+                                        {errors.map((error) => (
+                                            <div className="error">{error}</div>
+                                        ))}
+                                    </li>
+                                    <button type="submit">
+                                        { estadoformG && "Registrar Gasto" }
+                                        { estadoformI && "Registrar Ingreso" }
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    )}
+                </div>
+                <div className="ingresoN">
+                    <button className="ingresoB" onClick={() => {
+                        cambiarEstadoformI(!estadoformI); 
+                        const containerOverlay = document.querySelector('.containerOverlay');
+                        if (containerOverlay) {
+                            containerOverlay.classList.add('show');
+                        }
+                    }}>
+                        Nuevo Ingreso
+                    </button>
+                </div>
+            </div>
+        )}
+    </div>
+</div>
+*/
+
 .esporadicos-container {
     background-color: var(--card-color);
     border-radius: 10px;
@@ -8,386 +121,191 @@
 
 }
 
-.todo-mov {
-    width: 50%;
-    display: flex;
-    flex-direction: row;
-    gap: 20px;
-    padding: 10px;
-    justify-content: flex-end;
-}
-
-.mov-container span{
-    font-size: 1.5em;
-    font-weight: 700;
-}
-
-.mov {
-    min-width: 50px;
-}
-.ver-todo {
-    display: flex;
-    gap: 10px;
-    padding: 10px;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
-}
-
-.ver-todo:hover{
-    cursor: pointer;
-    background-color: var(--background-color);
-    border-radius: 10px;
-}
-.mov{
-    padding: 8px 5px;
-}
-.mov:hover {
-    cursor: pointer;
-    background-color: var(--background-color);
-    border-radius: 10px;
-}
-
-.ver-todo span {
-    padding-top: 6px;
-    display: flex;
-    text-align: center;
-    justify-content: center;
-    align-items: center;
-    min-width: fit-content;
-    
-}
-
-.ver-todo div {
-    display: flex;
-    flex-direction: row;
-    gap: 10px;
-    padding: 10px 5px;
-    border-bottom: 1px solid var(--background-color);
-}
-
+/* estilos para el contenedor de los movimientos */
 
 .mov-container {
-    display: flex;
-    justify-content: center;
-    align-items: center; 
-    flex-direction: row;
-    gap: 20px;
-    border-radius: 10px;
-    overflow: hidden;
+    padding: 1.5rem;
+    background-color: var(--card-color);
+    border-radius: 10px 10px 0 0;
+    color: var(--text-color);
+    font-size: 1.5rem;
     width: 100%;
-    padding: 30px;
-    position: relative; 
 }
 
-.mov-container::after {
-    margin-left: 30px;
-    content: ""; 
-    position: absolute;
-    left: 0; 
-    bottom: 0;
-    width: 94%;
-    height: 6px; 
-    background-color: var(--background-color); 
-    }
-
-.register{
-    display: flex;
-    align-items: center; 
-    flex-direction: row;
-    gap: 20px;
-    border-radius: 10px;    
-    width: 100%;
-    padding: 5px;
-    padding-right: 80px;
-    padding-left: 30px;
-    height: fit-content;
-    position: relative; 
-    justify-content: space-between;
-}
-
-.register::after{
-    margin-left: 30px;
-    content: ""; 
-    position: absolute;
-    left: 0; 
-    bottom: 0;
-    width: 94%;
-    height: 6px; 
-    background-color: var(--background-color); 
-    
-}
 .mov-container span {
     display: block;
-    width: 50%;
-    height: 100%;
+    border-bottom: 1px solid var(--primary-color);
+    width: 100%;
+    text-align: left;
+    padding: 0.5rem 0 1rem 0
 }
 
-.detalles{
+/* estilos para el contenedor de los montos */
+
+.monto-container {
+    overflow-y: auto;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    padding: 1rem;
+}
+
+/* estilos para los registros de los movimientos */
+
+.register {
     display: flex;
-    padding-right: 100px;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    border-radius: 10px;
+    background-color: var(--card-color);
+    color: var(--text-color);
+}
+
+.register .detalles {
+    display: flex;
     flex-direction: column;
-    padding: 10px;
-    border-radius: 10px;
-    color: var(--secondary-color);
+}
 
+.register .monto span {
+    font-size: 1.1rem;
+    width: 100%;
+    text-align: right;
 }
-.detalles span{
-    font-size: 1.3em;
-    font-weight: 500;
+
+.register .monto span.red {
+    color: red;
 }
-.Fecha{
-    font-size: 12px;
-}
-.monto{
+
+/* estilos para el contenedor de los botones de nuevo gasto e ingreso */
+
+.nuevo {
     display: flex;
-    padding-right: 50px;
-    justify-content: flex-end;
-    align-items: center;
-    gap: 10px;
-    padding: 10px;
-    border-radius: 10px;
-    color: var(--secondary-color);
-}
-.monto span{
-    font-size: 1.3em;
-    font-weight: 500;
-    display: flex;
-    text-align: center;
-    justify-content: center;
-    align-items: center;
-    min-width: fit-content;
-    
-}
-.register::after{
-    margin-left: 30px;
-    content: ""; 
-    position: absolute;
-    left: 0; 
-    bottom: 0;
-    width: 94%;
-    height: 6px; 
-    background-color: var(--background-color); 
-    
+    justify-content: space-around;
+    padding: 1rem;
+    gap: 1rem;
 }
 
+/* estilos para el botón de nuevo gasto */
 
-.nuevo{
+.gastoN {
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 10px;
-    margin-top: 25px;
-    padding: 10px;
-    border-radius: 10px;
-    color: var(--card-color);
+    width: 50%;
 }
 
-.gastoB{
-    background: white;
-    color: var(--secondary-color);
-    border: 3px solid var(--primary-color);
-    padding: 20px;
+.gastoB {
+    background-color: var(--primary-color);
+    color: var(--primary-color-text);
+    padding: 0.5rem 1rem;
+    border: none;
     border-radius: 5px;
-    font-weight: 700;
-    margin: 0.5rem 0;
-    font-size: 1rem;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    transition: 0.2s;
-}
-
-.ingresoB{
-    background: var(--primary-color);
-    color: var(--secondary-color);
-    border: 3px solid var(--primary-color);
-    padding: 20px;
-    border-radius: 5px;
-    font-weight: 700;
-    margin: 0.5rem 0;
-    font-size: 1rem;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    transition: 0.2s;
-}
-
-.ingresoB:hover{
-    background: var(--card-color);
-    color: var(--secondary-color);
-    border: 3px solid var(--secondary-color);
-    transition: 0.2s;
-    transform: scale(1.03);
     cursor: pointer;
-    background-color: var(--background-color);
-    border-radius: 10px;
+    width: 100%;
 }
+
+/* estilos para el botón de nuevo ingreso */
+
+.ingresoN {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-grow: 1;
+}
+
+.ingresoB {
+    background-color: var(--secondary-color);
+    color: var(--card-color);
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    width: 100%;
+}
+
+/* estilos para el overlay */
 
 .overlay {
     position: fixed;
-    background-color: rgba(0, 0, 0, 0.5);
-    width: 100vw;
-    height: 100vh;
     top: 0;
     left: 0;
-    padding: 40px;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
     display: flex;
-    align-items: center;
     justify-content: center;
-}
-
-
-.containerOverlay{
-    width: 500px;
-    right: 110px;
-    min-height: 100px;
-    background: #fff;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    padding-left: 40px;
-    padding-right: 40px;
-    padding-top: 30px;
-    padding-bottom: 30px;
-    position: relative;
-    border-radius: 5px;
-
-}
-
-/*
-
-    opacity: 0;
-    transform: translateY(-20px);
-    transition: opacity 0.3s ease, transform 0.3s ease;
-    .containerOverlay.show {
-    opacity: 1;
-    transform: translateY(0); 
-}
-    */
-
-
-.encabezadoOverlay{
-    display: flex;
     align-items: center;
-    justify-content: space-between;
-    margin-bottom: 20px;
-    padding-bottom: 20px;
-    border-bottom: 1px solid #E8E8E8;
 }
 
-.encabezadoOverlay h2{
-    font-size: 25px;
-    font-weight: bold;
-    color: #001f3f;
-
-}
-.cerrarOverlay{
-    position: absolute;
-    top:20px;
-    right: 20px;
-    width: 30px;
-    height: 30px;
-    border: none;
-    background: none;
-    cursor: pointer;
-    transition: .3s ease all;
-    border-radius: 5px;
-    color: #001f3f;
-
-}
-
-.cerrarOverlay:hover{
-background: #F2F2F2;
-}
-
-
-
-.gastoB:hover{
-    background: var(--primary-color);
-    color: var(--secondary-color);
-    border: 3px solid var(--secondary-color);
-    transition: 0.2s;
-    transform: scale(1.03);
-    cursor: pointer;
-    background-color: var(--background-color);
+.containerOverlay {
+    background-color: var(--card-color);
     border-radius: 10px;
+    padding: 1rem;
+    position: relative;
 }
+
+.encabezadoOverlay {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.cerrarOverlay {
+    background-color: var(--button-color);
+    color: var(--text-color);
+    padding: 0.5rem;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+/* estilos para el formulario de nuevo gasto */
 
 .formNewG {
-    color:#001f3f;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    padding: 1rem;
+}
+
+.campo {
     display: flex;
     flex-direction: column;
-    max-height: 500px;
-    overflow-y: scroll;
-    overflow-x: hidden;
-    padding: 20px;
 }
 
-/* webkit */
-.formNewG::-webkit-scrollbar {
-    width: 5px;
+.campo label {
+    color: var(--text-color);
 }
 
-.formNewG::-webkit-scrollbar-thumb {
-    background-color: #ccc;
+.campo input {
+    padding: 0.5rem;
+    border: 1px solid var(--text-color);
     border-radius: 5px;
 }
 
-.formNewG .campo {
-    margin-bottom: 20px;
+.campo input:focus {
+    outline: none;
 }
 
-.formNewG label {
-    font-weight: 600;
+.error {
+    color: red;
 }
 
-.formNewG input[type="text"],
-.formNewG input[type="number"] {
-    width: 100%;
-    padding: 8px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    transition: border-color 0.3s ease;
-}
+/* estilos para el botón de submit */
 
-.formNewG input[type="text"]:focus,
-.formNewG input[type="number"]:focus {
-    border-color: #007bff;
-}
-
-/* date */
-.formNewG input[type="date"] {
-    width: 100%;
-    padding: 8px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    transition: border-color 0.3s ease;
-}
-
-
-.formNewG button {
-    padding: 10px 20px;
-    background-color: #1f78d8;
-    color: #fff;
+button[type="submit"] {
+    background-color: var(--button-color);
+    color: var(--text-color);
+    padding: 0.5rem 1rem;
     border: none;
-    border-radius: 4px;
+    border-radius: 5px;
     cursor: pointer;
-    transition: all 0.3s ease;
 }
 
-.formNewG button:hover {
-    transition: all 0.3s ease;
-    transform: scale(1.01);
-    background-color: #0056b3;
+/* estilos para lista de errores */
+
+li {
+    list-style: none;
 }
 
-
-
-.monto-container{
-    display: flex;
-    flex-direction: column;
-    overflow-y: scroll;
-    gap: 10px;
-    padding: 10px;
-    border-radius: 10px;
-    color: var(--secondary-color);
-}
