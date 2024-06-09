@@ -2,6 +2,7 @@ import logo from '../../assets/logo.png';
 import './LoginRegister.css';
 import React, {useState} from 'react';
 import background from '../../assets/background.svg';
+import { serverUrl } from '../../utils/config';
 
 function LoginRegister(){
     let token = localStorage.getItem('token');
@@ -63,7 +64,7 @@ function LoginRegister(){
 
         /* Aquí va el código para hacer login */
         // se usa email y password en la petición
-        fetch('http://127.0.0.1:5000/login', {
+        fetch(serverUrl + '/login', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -115,7 +116,7 @@ function LoginRegister(){
 
         /* Aquí va el código para hacer registro */
         // se usa email y password en la petición
-        fetch('http://127.0.0.1:5000/register', {
+        fetch(serverUrl + '/register', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -156,7 +157,7 @@ function LoginRegister(){
 
         /* Aquí va el código para hacer login como espectador */
         // se usa invitation_code en la petición
-        fetch('http://127.0.0.1:5000/login-espectador', {
+        fetch(serverUrl + '/login-espectador', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'

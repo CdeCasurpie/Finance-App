@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import "./Esporadicos.css";
+import { serverUrl } from "../../utils/config";
 // const movimientosEsporadicos = [
 //     {
 //         tipo: "ingreso",
@@ -37,7 +38,7 @@ function Esporadicos({ spectator }) {
             "monto": monto,
         }
 
-        fetch("http://localhost:5000/movimiento/esporadico", {
+        fetch(serverUrl + "/movimiento/esporadico", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -66,7 +67,7 @@ function Esporadicos({ spectator }) {
     };
  
     const loadMovimientos = () => {
-        const url = "http://localhost:5000/movimiento/esporadico";
+        const url = serverUrl + "/movimiento/esporadico";
 
         fetch(url, {
             method: "GET",

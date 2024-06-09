@@ -1,5 +1,6 @@
 import './Resumen.css';
 import { useState, useEffect } from 'react';
+import { serverUrl } from '../../utils/config';
 
 function Resumen({ spectator }) {
 
@@ -47,7 +48,7 @@ function Resumen({ spectator }) {
     }
 
     const getData = (querie_year) => {
-        const url = "http://localhost:5000/movimiento?anio=" + querie_year;
+        const url = serverUrl + "/movimiento?anio=" + querie_year;
         fetch(url, {
             method: 'GET',
             headers: {

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import "./Clientes.css";
+import { serverUrl } from "../../utils/config";
 
 function Clientes({ spectator }) {
     // estados ---------------------------------------
@@ -26,7 +27,7 @@ function Clientes({ spectator }) {
 
     // funciones -------------------------------------
     const getClients = () => {
-        const url = 'http://localhost:5000/cliente';
+        const url = serverUrl + '/cliente';
 
         fetch(url, {
             method: 'GET',
@@ -80,7 +81,7 @@ function Clientes({ spectator }) {
 
     const modificarCliente = (cliente, e) => {
         e.preventDefault();
-        const url = `http://localhost:5000/cliente/${cliente.id}`;
+        const url = serverUrl + `/cliente/${cliente.id}`;
 
         const copy = { ...cliente };
 
@@ -129,7 +130,7 @@ function Clientes({ spectator }) {
     }
 
     const actDecClient = (cliente, action) => {
-        const url = `http://localhost:5000/cliente/${cliente.id}/${action}`;
+        const url = serverUrl + `/cliente/${cliente.id}/${action}`;
 
         fetch(url, {
             method: 'PUT',

@@ -1,5 +1,7 @@
 import './Fijos.css';
 import { useEffect, useState } from 'react';
+import { serverUrl } from '../../utils/config';
+
 
 
 function Fijos({spectator}) {
@@ -70,7 +72,7 @@ function Fijos({spectator}) {
     }
 
     const getClients = (year) => {
-        const url = 'http://localhost:5000/cliente'
+        const url = serverUrl + '/cliente'
         const queryParameters = `?year=${year}`
 
         fetch(url + queryParameters, {
@@ -120,7 +122,7 @@ function Fijos({spectator}) {
     const createClient = (evenet) => {
         evenet.preventDefault();
 
-        const url = 'http://localhost:5000/cliente'
+        const url = serverUrl + '/cliente'
 
 
         const form = evenet.target;
@@ -164,7 +166,7 @@ function Fijos({spectator}) {
 
     const createPago = (event) => {
         event.preventDefault();
-        const url = 'http://localhost:5000/movimiento/fijo/ingreso'
+        const url = serverUrl + '/movimiento/fijo/ingreso'
 
         const form = event.target;
         const datain = {};
@@ -215,7 +217,7 @@ function Fijos({spectator}) {
     }
 
     const getDeberes = (year) => {
-        const url = 'http://localhost:5000/deber'
+        const url = serverUrl + '/deber'
         const queryParameters = `?year=${year}`
         fetch(url + queryParameters, {
             method: 'GET',
@@ -255,7 +257,7 @@ function Fijos({spectator}) {
 
     const createDeber = (event) => {
         event.preventDefault();
-        const url = 'http://localhost:5000/deber'
+        const url = serverUrl + '/deber'
 
         const form = event.target;
         const datain = {};
@@ -304,7 +306,7 @@ function Fijos({spectator}) {
 
     const createGasto = (event) => {
         event.preventDefault();
-        const url = 'http://localhost:5000/movimiento/fijo/gasto'
+        const url = serverUrl + '/movimiento/fijo/gasto'
 
         const form = event.target;
         const datain = {};

@@ -1,12 +1,13 @@
 import './Navbar.css';
 import { useState, useEffect as UseEffect } from 'react';
+import { serverUrl } from '../../utils/config';
 
 function Navbar({ setSection }) {
 
   const [invitationCode, setInvitationCode] = useState('');
 
   UseEffect(() => {
-    fetch('http://localhost:5000/codigo-invitacion', {
+    fetch(serverUrl + '/codigo-invitacion', {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
