@@ -41,10 +41,10 @@
 }
 
 .navbar h1 {
-    color: var(--secondary-color);
+    color: var(--primary-color);
     font-size: 1.5rem;
     text-align: center;
-    border-bottom: 1px solid var(--secondary-color);
+    border-bottom: 1px solid var(--primary-color);
     display: flex;
     justify-content: center;
     align-items: flex-start;

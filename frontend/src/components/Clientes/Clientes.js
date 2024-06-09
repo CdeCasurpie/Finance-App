@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import "./Clientes.css";
 
-
 function Clientes({ spectator }) {
     // estados ---------------------------------------
     const [filters, setFilters] = useState({
@@ -69,8 +68,6 @@ function Clientes({ spectator }) {
         setVisualizedClients(filteredClients);
     }
 
-
-
     const showClient = (cliente) => {
         setClientData(cliente);
         setShowClientData(true);
@@ -131,7 +128,35 @@ function Clientes({ spectator }) {
             .catch(error => alert(error));
     }
 
+    const actDecClient = (cliente, action) => {
+        const url = `http://localhost:5000/cliente/${cliente.id}/${action}`;
 
+        fetch(url, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            }
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (!data.success) {
+                    if (data.message) {
+                        alert(data.message);
+                    } else if (data.error) {
+                        alert(data.error);
+                    } else if (data.errors) {
+                        alert(data.errors.join('\n'));
+                    } else {
+                        alert('Error desconocido');
+                    }
+                    return;
+                }
+                alert('Cliente activado exitosamente');
+                getClients();
+            })
+            .catch(error => alert(error));
+    }
 
 
     // efectos ---------------------------------------
@@ -159,7 +184,13 @@ function Clientes({ spectator }) {
                     {visualizedClients.map((cliente) => (
                         <div key={cliente.id} className="cliente-card">
                             <div className={`cliente-info ${cliente.status ? 'active' : 'inactive'}`}>
-                                <h2>{cliente.nombre}</h2>
+                                <h2>
+                                    {cliente.nombre}
+                                    <button 
+                                        className="status-btn"
+                                        onClick={ cliente.status ? () => actDecClient(cliente, 'desactivar') : () => actDecClient(cliente, 'activar') }
+                                    >{cliente.status ? 'Desactivar' : 'Activar'}</button>
+                                </h2>
                                 <div className="cliente-data">
                                     <p>Telefono: {cliente.telefono}</p>
                                     <p>Sede: {cliente.sede}</p>

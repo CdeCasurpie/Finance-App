@@ -25,7 +25,7 @@
     transition: all 0.3s ease;
     height: 50px;
     position: relative;
-    background-color: var(--background-color);
+    background-color: var(--white-white-color);
 }
 
 .toogle-switch-button .toogle-switch-ball {
@@ -164,7 +164,7 @@
     cursor: pointer;
     transition: all 0.2s;
     margin: 0 10px;
-    background-color: var(--background-color);
+    background-color: var(--white-white-color);
 }
 
 .months-header .actual {
@@ -190,7 +190,7 @@
 }
 
 .clients-list-container::-webkit-scrollbar-track {
-    background-color: var(--background-color);
+    background-color: var(--white-white-color);
     border-radius: 10px;
 }
 
@@ -216,7 +216,7 @@
     transition: all 0.2s;
     margin: 0 10px;
     width: 100%;
-    background-color: var(--background-color);
+    background-color: var(--white-white-color);
 }
 
 .pending-month {
@@ -236,7 +236,7 @@
     grid-template-areas: 
         "name name";
     grid-gap: 10px;
-    background-color: var(--background-color);
+    background-color: var(--white-white-color);
     padding: 10px;
     border-radius: 10px;
     font-size: 0.85rem;
@@ -270,7 +270,7 @@
     transition: all 0.2s;
     margin: 0 10px;
     width: 100%;
-    background-color: var(--background-color);
+    background-color: var(--white-white-color);
 }
 
 .fijos-container h2 button {

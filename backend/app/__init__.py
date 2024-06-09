@@ -386,6 +386,8 @@ def get_clientes():
 
         # clientes ordenados por status
         clientes = Cliente.query.filter_by(user=user.id).order_by(Cliente.status).all()
+        #invertir lista
+        clientes = clientes[::-1]
 
         clientes = [cliente.serialize() for cliente in clientes]
 
@@ -544,13 +546,46 @@ def update_cliente(id):
 @app.route('/cliente/<id>/activar', methods=['PUT'])
 @jwt_required()
 def activar_cliente(id):
-    pass
+    try:
+        user = getUser(get_jwt_identity())
+
+        cliente = Cliente.query.filter_by(id=id).first()
+
+        if cliente is None:
+            return jsonify({'success': False, 'message': 'Cliente no encontrado'}), 400
+        elif cliente.user != user.id:
+            abort(403)
+        else:
+            cliente.status = True
+            db.session.commit()
+
+            return jsonify({'success': True, 'message': 'Cliente activado exitosamente'})
+    except Exception as e:
+        print(e)
+        abort(500)
+
 
 
 @app.route('/cliente/<id>/desactivar', methods=['PUT'])
 @jwt_required()
 def desactivar_cliente(id):
-    pass
+    try:
+        user = getUser(get_jwt_identity())
+
+        cliente = Cliente.query.filter_by(id=id).first()
+
+        if cliente is None:
+            return jsonify({'success': False, 'message': 'Cliente no encontrado'}), 400
+        elif cliente.user != user.id:
+            abort(403)
+        else:
+            cliente.status = False
+            db.session.commit()
+
+            return jsonify({'success': True, 'message': 'Cliente desactivado exitosamente'})
+    except Exception as e:
+        print(e)
+        abort(500)
 
 
 @app.route('/cliente/<id>', methods=['DELETE'])

@@ -118,6 +118,7 @@
     display: grid;
     grid-template-rows: 10vh 50vh 10vh;
     max-height: 100%;
+    padding-right: 5px;
 
 }
 
@@ -141,15 +142,15 @@
 }
 
 /* estilos para el contenedor de los montos */
-
 .monto-container {
     overflow-y: auto;
-    display: grid;
-    grid-template-columns: 1fr;
+    display: flex;
     gap: 1rem;
     padding: 1rem;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-direction: column;
 }
-
 /* estilos para los registros de los movimientos */
 
 .register {
@@ -159,6 +160,7 @@
     padding: 1rem;
     border-radius: 10px;
     background-color: var(--card-color);
+    width: 100%;
     color: var(--text-color);
 }
 
