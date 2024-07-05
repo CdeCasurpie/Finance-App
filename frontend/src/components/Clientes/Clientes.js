@@ -90,16 +90,14 @@ function Clientes({ spectator }) {
         copy.nombre = e.target[0].value;
         copy.telefono = e.target[1].value;
         copy.direccion = e.target[2].value;
-        copy.sede = e.target[3].value;
-        copy.paquete = e.target[4].value;
-        copy.login = e.target[5].value;
-        copy.caja = e.target[6].value;
-        copy.borne = e.target[7].value;
-        copy.monto = e.target[8].value;
-        copy.iptv = e.target[9].value;
-
-        // fecha a %Y-%m-%d
-        copy.fecha_instalacion = new Date(copy.fecha_instalacion).toISOString().split('T')[0];
+        copy.fecha_instalacion = e.target[3].value;
+        copy.sede = e.target[4].value;
+        copy.paquete = e.target[5].value;
+        copy.login = e.target[6].value;
+        copy.caja = e.target[7].value;
+        copy.borne = e.target[8].value;
+        copy.monto = e.target[9].value;
+        copy.iptv = e.target[10].value;
 
         fetch(url, {
             method: 'PUT',
@@ -226,7 +224,7 @@ function Clientes({ spectator }) {
                         <p>Telefono: {clientData.telefono}</p>
                         <p>Direccion: {clientData.direccion}</p>
                         <p>Fecha de instalacion: {
-                            new Date(clientData.fecha_instalacion).toLocaleDateString()
+                            new Date(clientData.fecha_instalacion).toISOString().split('T')[0]
                         }</p>
                         <p>Sede: {clientData.sede}</p>
                         <p>Paquete: {clientData.paquete}</p>
@@ -256,6 +254,8 @@ function Clientes({ spectator }) {
                         <input type="text" placeholder="Telefono" value={clientData.telefono} onChange={(e) => setClientData({ ...clientData, 'telefono': e.target.value })} />
                         <label>Direccion</label>
                         <input type="text" placeholder="Direccion" value={clientData.direccion} onChange={(e) => setClientData({ ...clientData, 'direccion': e.target.value })} />
+                        <label>Fecha de Instalacion</label>
+                        <input type="date" value={new Date(clientData.fecha_instalacion).toISOString().split('T')[0]} onChange={(e) => setClientData({ ...clientData, 'fecha_instalacion': e.target.value })} />
                         <label>Sede</label>
                         <input type="text" placeholder="Sede" value={clientData.sede} onChange={(e) => setClientData({ ...clientData, 'sede': e.target.value })} />
                         <label>Paquete</label>
