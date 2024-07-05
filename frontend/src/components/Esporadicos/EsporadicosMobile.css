@@ -1,0 +1,11 @@
+@media (max-width: 768px) {
+    .esporadicos-container {
+        background-color: var(--card-color);
+        border-radius: 10px;
+        flex-grow: 1;
+        display: grid;
+        grid-template-rows: 10% 1fr 12%;
+        max-height: 100%;
+        padding-right: 5px;
+    }
+}

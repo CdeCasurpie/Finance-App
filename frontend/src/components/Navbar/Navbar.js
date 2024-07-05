@@ -1,4 +1,5 @@
 import './Navbar.css';
+import './NavBarMobile.css';
 import { useState, useEffect as UseEffect } from 'react';
 import { serverUrl } from '../../utils/config';
 
@@ -65,13 +66,14 @@ function Navbar({ setSection }) {
 
   return (
     <nav className="navbar">
-      <h1 className="navbar__title">SITEL Gestor Finanzas</h1>
+      <h1 className="hideMobile navbar__title">SITEL Gestor Finanzas</h1>
+      <button className="logout_button_mobile showMobile" onClick={logout}>Cerrar sesión</button>
       <button className="navbar__button" onClick={(e) => { selectThis(e); setSection('resumen') }}>Resumen</button>
       <button className="navbar__button" onClick={(e) => { selectThis(e); setSection('fijos') }}>Fijos</button>
       <button className="navbar__button" onClick={(e) => { selectThis(e); setSection('esporadicos') }}>Esporádicos</button>
       <button className="navbar__button" onClick={(e) => { selectThis(e); setSection('clientes') }}>Clientes</button>
-      <div className="white__space"></div>
-      <div className='invitation-code'>
+      <div className="white__space hideMobile"></div>
+      <div className='invitation-code hideMobile'>
         <button className='invitation-code-btn' onClick={(e) => { copyCode(e) }}>
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <rect x="5" y="3" width="14" height="18" rx="2" ry="2" />
@@ -81,7 +83,7 @@ function Navbar({ setSection }) {
         </button>
         <input type="text" value={invitationCode} readOnly />
       </div>
-      <button className="navbar__button logout__button" onClick={logout}>Cerrar sesión</button>
+      <button className="navbar__button logout__button hideMobile" onClick={logout}>Cerrar sesión</button>
     </nav>
   );
 }

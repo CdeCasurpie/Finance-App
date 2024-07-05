@@ -1,0 +1,12 @@
+@media (max-width: 768px) {
+    .resumen-container {
+        display: flex;
+        flex-direction: column;
+        overflow-y: scroll;
+    }
+
+    .resumen-container::-webkit-scrollbar {
+        display: none;
+    }
+
+}

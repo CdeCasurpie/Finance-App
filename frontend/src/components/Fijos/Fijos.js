@@ -1,4 +1,5 @@
 import './Fijos.css';
+import './FijosMobile.css';
 import { useEffect, useState } from 'react';
 import { serverUrl } from '../../utils/config';
 
@@ -6,6 +7,7 @@ import { serverUrl } from '../../utils/config';
 
 function Fijos({spectator}) {
     //Variables de estado -------------------------------
+    const [monthsToShow, setMonthsToShow] = useState(3); //meses a mostrar
     const [year, setYear] = useState(new Date().getFullYear()); //año actual
     const [iteratorMonth, setIteratorMonth] = useState(0); //mes actual inicial visible
     const [type, setType] = useState('Ingresos');
@@ -20,8 +22,6 @@ function Fijos({spectator}) {
     const [newPagoData, setNewPagoData] = useState({}); //datos del nuevo pago a registrar
     //deberes: lista de deberes que debe pagar el usuario
     const [deberes, setDeberes] = useState([]);
-    const [newDeberData, setNewDeberData] = useState({}); //datos del nuevo deber a registrar
-
  
     //ventanas emergentes --------------------------------
     //forms para ingresos
@@ -37,8 +37,25 @@ function Fijos({spectator}) {
     const thisYear = new Date().getFullYear();
     const months = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
 
+    const getMonthsToShow = () => {
+        if (window.innerWidth > 1200) {
+            return 3;
+        } else if (window.innerWidth > 768) {
+            return 2;
+        } else if (window.innerWidth <= 768) {
+            return 1;
+        }
+    }
 
     //Logic
+
+    useEffect(() => {
+        setMonthsToShow(getMonthsToShow());
+        //establecer los event de resize
+        window.addEventListener('resize', () => {
+            setMonthsToShow(getMonthsToShow());
+        });
+    }, []);
 
     useEffect(() => {
         getClients(year);
@@ -46,8 +63,8 @@ function Fijos({spectator}) {
     }, [year]);
 
     useEffect(() => {
-        setIteratorMonth(thisMonth - (thisMonth % 3));
-    }, [thisMonth]);
+        setIteratorMonth(thisMonth - (thisMonth % monthsToShow));
+    }, [thisMonth, monthsToShow]);
 
     useEffect(() => {
         setYear(thisYear);
@@ -56,17 +73,17 @@ function Fijos({spectator}) {
 
     //Funciones -----------------------------------------
     const advanceMonth = () => {
-        setIteratorMonth(iteratorMonth + 3);
-        if (iteratorMonth >= 9) {
+        setIteratorMonth(iteratorMonth + monthsToShow);
+        if (iteratorMonth >= 12 - monthsToShow) {
             setIteratorMonth(0);
             setYear(year + 1);
         }
     }
 
     const backMonth = () => {
-        setIteratorMonth(iteratorMonth - 3);
-        if (iteratorMonth < 3) {
-            setIteratorMonth(9);
+        setIteratorMonth(iteratorMonth - monthsToShow);
+        if (iteratorMonth < monthsToShow) {
+            setIteratorMonth(12 - monthsToShow);
             setYear(year - 1);
         }
     }
@@ -182,7 +199,7 @@ function Fijos({spectator}) {
         datain.monto = parseFloat(datain.monto);
 
         //verificar que la fecha sea real , osea que febrero no tenga 30 dias
-        if (datain.fecha.split('-')[2] > 28 && datain.fecha.split('-')[1] == 2) {
+        if (datain.fecha.split('-')[2] > 28 && datain.fecha.split('-')[1] === 2) {
             setErrors(['Fecha invalida: Febrero solo tiene 28 dias']);
         } else if (datain.fecha.split('-')[2] > 30 && [4, 6, 9, 11].includes(parseInt(datain.fecha.split('-')[1]))) {
             setErrors(['Fecha invalida: Este mes solo tiene 30 dias']);
@@ -322,7 +339,7 @@ function Fijos({spectator}) {
         datain.monto = parseFloat(datain.monto);
 
         //verificar que la fecha sea real , osea que febrero no tenga 30 dias
-        if (datain.fecha.split('-')[2] > 28 && datain.fecha.split('-')[1] == 2) {
+        if (datain.fecha.split('-')[2] > 28 && datain.fecha.split('-')[1] === 2) {
             setErrors(['Fecha invalida: Febrero solo tiene 28 dias']);
         } else if (datain.fecha.split('-')[2] > 30 && [4, 6, 9, 11].includes(parseInt(datain.fecha.split('-')[1]))) {
             setErrors(['Fecha invalida: Este mes solo tiene 30 dias']);
@@ -360,7 +377,7 @@ function Fijos({spectator}) {
     return (
         <div className='main-container'>
             <h1 className='h1-fijos'>
-                Fijos
+                <label className='hideMobile'>Fijos</label>
                 <div className='toogle-switch-container'>
                     <div className='toogle-switch'>
                         <label className={`toogle-switch-label ${!enabled ? "label-enabled" : "label-disabled"}`}
@@ -392,7 +409,7 @@ function Fijos({spectator}) {
             { type === 'Ingresos' && (
                 <div className='fijos-container'>
                     <h2>
-                        Ingresos {year}
+                        <label className='hideMobile'>Ingresos {year}</label>
                         <button className='arrow-button' onClick={backMonth}>{'<'}</button>
                         <button className='arrow-button' onClick={advanceMonth}>{'>'}</button>
                         { !spectator && (
@@ -400,9 +417,9 @@ function Fijos({spectator}) {
                         )}
                     </h2>
                     <div className='months-header'>
-                        <div className={`month ${iteratorMonth === thisMonth && year === thisYear ? 'actual' : ''}`}>{months[iteratorMonth]}</div>
-                        <div className={`month ${iteratorMonth + 1 === thisMonth && year === thisYear ? 'actual' : ''}`}>{months[iteratorMonth + 1]}</div>
-                        <div className={`month ${iteratorMonth + 2 === thisMonth && year === thisYear ? 'actual' : ''}`}>{months[iteratorMonth + 2]}</div>
+                        { months.slice(iteratorMonth, iteratorMonth + monthsToShow).map((month, i) => (
+                            <div className={`month ${iteratorMonth + i === thisMonth && year === thisYear ? 'actual' : ''}`} key={i}>{month}</div>
+                        ))}
                     </div>
 
                     <div className='clients-list-container'>
@@ -410,11 +427,11 @@ function Fijos({spectator}) {
                             <div className='client-list' key={cliente.id}>
                                 <div className='client-data'>
                                     <div className='client-name'>{cliente.nombre}</div>
-                                    <div className='client-description'>{cliente.telefono}</div>
-                                    <div className='client-value'>{cliente.monto}</div>
+                                    <div className='client-description hideMobile'>{cliente.telefono}</div>
+                                    <div className='client-value hideMobile'>{cliente.monto}</div>
                                 </div>
                                 <div className='client-months'>
-                                    { [0, 1, 2].map(i => {
+                                    { months.slice(iteratorMonth, iteratorMonth + monthsToShow).map((month, i) => {
                                     
                                         //si se debe mostrar alguna información (despues de inscripcion 
                                         // y antes o igual a hoy) se muestra el pago o pendiente
@@ -464,7 +481,7 @@ function Fijos({spectator}) {
             { type === 'Gastos' && (
                 <div className='fijos-container'>
                     <h2>
-                        Gastos {year}
+                        <label className='hideMobile'>Gastos {year}</label>
                         <button className='arrow-button' onClick={backMonth}>{'<'}</button>
                         <button className='arrow-button' onClick={advanceMonth}>{'>'}</button>
                         { !spectator && (
@@ -472,9 +489,9 @@ function Fijos({spectator}) {
                         )}
                     </h2>
                     <div className='months-header'>
-                        <div className={`month ${iteratorMonth === thisMonth && year === thisYear ? 'actual' : ''}`}>{months[iteratorMonth]}</div>
-                        <div className={`month ${iteratorMonth + 1 === thisMonth && year === thisYear ? 'actual' : ''}`}>{months[iteratorMonth + 1]}</div>
-                        <div className={`month ${iteratorMonth + 2 === thisMonth && year === thisYear ? 'actual' : ''}`}>{months[iteratorMonth + 2]}</div>
+                        { months.slice(iteratorMonth, iteratorMonth + monthsToShow).map((month, i) => (
+                            <div className={`month ${iteratorMonth + i === thisMonth && year === thisYear ? 'actual' : ''}`} key={i}>{month}</div>
+                        ))}
                     </div>
 
                     <div className='clients-list-container'>
@@ -482,11 +499,11 @@ function Fijos({spectator}) {
                             <div className='client-list' key={deber.id}>
                                 <div className='client-data'>
                                     <div className='client-name'>{deber.detalle}</div>
-                                    <div className='client-description'>{deber.fecha_inicio}</div>
-                                    <div className='client-value'>{deber.repeticion}</div>
+                                    <div className='client-description hideMobile'>{deber.fecha_inicio}</div>
+                                    <div className='client-value hideMobile'>{deber.repeticion}</div>
                                 </div>
                                 <div className='client-months'>
-                                    { [0, 1, 2].map(i => {
+                                    { months.slice(iteratorMonth, iteratorMonth + monthsToShow).map((month, i) => {
                                     
                                         //si se debe mostrar alguna información (despues de inscripcion 
                                         // y antes o igual a hoy) se muestra el pago o pendiente
@@ -782,9 +799,7 @@ function Fijos({spectator}) {
                     </div>
                 </div>
             )}
-        </div>
-
-        
+        </div>  
     );
 }
 

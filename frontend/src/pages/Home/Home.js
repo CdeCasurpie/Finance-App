@@ -1,5 +1,6 @@
 import Navbar from '../../components/Navbar/Navbar';
 import './Home.css';
+import './HomeMobile.css';
 import background from '../../assets/background.svg';
 
 import Resumen from '../../components/Resumen/Resumen';
@@ -70,6 +71,7 @@ function Home () {
           <Clientes spectator={spectator}/>
         </section>
       </main>
+
       <Navbar setSection={selectSection}/>
     </div>
   );

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import "./Esporadicos.css";
+import "./EsporadicosMobile.css";
 import { serverUrl } from "../../utils/config";
 // const movimientosEsporadicos = [
 //     {

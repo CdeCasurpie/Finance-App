@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import "./Clientes.css";
+import "./ClientesMobile.css";
 import { serverUrl } from "../../utils/config";
 
 function Clientes({ spectator }) {
@@ -163,6 +164,7 @@ function Clientes({ spectator }) {
     // efectos ---------------------------------------
     useEffect(() => {
         filter();
+        // eslint-disable-next-line
     }, [filters, clientes]);
 
     useEffect(() => {
@@ -174,7 +176,7 @@ function Clientes({ spectator }) {
             <h1>Gestionar Clientes</h1>
             <div className="clientes-container">
                 <div className="clientes-searcher">
-                    <h3>Buscar por:</h3>
+                    <h3 className="hideMobile">Buscar por:</h3>
                     <input type="text" placeholder="nombre del cliente" onChange={(e) => setFilters({ ...filters, 'nombre': e.target.value })} />
                     <input type="text" placeholder="telefono" onChange={(e) => setFilters({ ...filters, 'telefono': e.target.value })} />
                     <input type="text" placeholder="sede" onChange={(e) => setFilters({ ...filters, 'sede': e.target.value })} />
@@ -205,6 +207,8 @@ function Clientes({ spectator }) {
                             </div>
                         </div>
                     ))} 
+
+                    {visualizedClients.length === 0 && <h2 className="notFound">No se encontraron clientes</h2>}
                 </div>
             </div>
 

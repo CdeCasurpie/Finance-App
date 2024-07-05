@@ -1,4 +1,5 @@
 import './Resumen.css';
+import './ResumenMobile.css';
 import { useState, useEffect } from 'react';
 import { serverUrl } from '../../utils/config';
 

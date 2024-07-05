@@ -1,0 +1,47 @@
+@media (max-width: 768px) {
+    .navbar {
+        display: flex;
+        background-color: #ffffff17;
+        box-shadow: 50px 0 50px var(--primary-color);
+        animation: slideIn 0.5s forwards;
+        justify-content: space-evenly;
+        align-items: center;
+        height: 100px;
+    }
+
+    .navbar__button {
+        background: var(--primary-color);
+        color: var(--primary-color-text);
+        border: 1px solid var(--primary-color);
+        padding: 20px;
+        border-radius: 5px;
+        margin: 0.5rem 0;
+        font-size: 0.8rem;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        transition: 0.2s;
+        width: 22%;
+    }
+
+    .selected {
+        background: var(--secondary-color);
+        color: var(--card-color);
+        border: 1px solid var(--secondary-color);
+        padding: 20px;
+        border-radius: 5px;
+        margin: 0.5rem 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        transition: 0.2s;
+    } 
+
+    .hideMobile {
+        display: none;
+    }
+
+    .showMobile {
+        display: auto;
+    }
+}
