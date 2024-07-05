@@ -26,8 +26,17 @@ function Navbar({ setSection }) {
   }, []);
 
 
+  const copyToClipboard = (str) => {
+    const el = document.createElement('textarea');
+    el.value = str;
+    document.body.appendChild(el);
+    el.select();
+    document.execCommand('copy');
+    document.body.removeChild(el);
+  }
+
   const copyCode = (e) => {
-    navigator.clipboard.writeText(invitationCode);
+    copyToClipboard(invitationCode);
 
     //cambiar el html del boton
     e.target.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12" /></svg>';  
