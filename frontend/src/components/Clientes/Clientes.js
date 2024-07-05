@@ -52,7 +52,6 @@ function Clientes({ spectator }) {
                     return;
                 }
                 setClientes(data.clientes);
-                console.log(data.clientes);
             })
             .catch(error => alert(error));
     }

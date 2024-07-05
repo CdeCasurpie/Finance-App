@@ -14,7 +14,6 @@ import { serverUrl } from "../../utils/config";
 
 
 function Esporadicos({ spectator }) {
-    console.log(spectator);
     //ventanas emergentes ---------------------
     const [estadoformG, cambiarEstadoformG] = useState(false);
     const [estadoformI, cambiarEstadoformI] = useState(false);

@@ -4,6 +4,8 @@ from flask_jwt_extended import JWTManager, create_access_token, jwt_required, ge
 from uuid import uuid4
 from flask_cors import CORS
 from datetime import datetime, timedelta
+import json
+from flask_migrate import Migrate
 
 # INICIALIZACIÓN DE LA APLICACIÓN ========================================================================================
 
@@ -11,6 +13,11 @@ app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///test.db'
 
 db = SQLAlchemy(app)
+
+
+# Configuración de migraciones
+migrate = Migrate(app, db)
+
 
 # Configuración de JWT
 app.config['JWT_SECRET_KEY'] = 'esternocleidomastoideo'
@@ -57,8 +64,27 @@ class Cliente(db.Model):
     monto = db.Column(db.Float, nullable=False)
     iptv = db.Column(db.Integer, nullable=False)
     paymentDate = db.Column(db.DateTime, nullable=True)
+    status_history = db.Column(db.Text, nullable=True)
 
     user = db.Column(db.String(50), db.ForeignKey('user.id'), nullable=False)
+
+
+    def add_status_change(self, new_status):
+        status_history = json.loads(self.status_history or '[]')
+
+        if len(status_history) > 0:
+            status_history.append({
+                'status': new_status,
+                'date': datetime.now().isoformat()
+            })
+        else:
+            status_history = [{
+                'status': new_status,
+                'date': self.fecha_instalacion.isoformat()
+            }]
+
+        self.status_history = json.dumps(status_history)
+
 
     def serialize(self):
         return {
@@ -74,7 +100,8 @@ class Cliente(db.Model):
             'borne': self.borne,
             'status': self.status,
             'monto': self.monto,
-            'iptv': self.iptv
+            'iptv': self.iptv,
+            'status_history': json.loads(self.status_history or '[]')
         }
 
 class Deber(db.Model):
@@ -423,6 +450,7 @@ def get_clientes():
         abort(500)
 
 
+
 @app.route('/cliente', methods=['POST'])
 @jwt_required()
 def add_cliente():
@@ -445,6 +473,7 @@ def add_cliente():
         if (data['status'] != True) and (data['status'] != False):
             return jsonify({'success': False, 'errors': ['El campo "status" debe ser un valor booleano']})
 
+        # Crear cliente
         cliente = Cliente(
             id=str(uuid4()),
             nombre=data['nombre'],
@@ -460,20 +489,25 @@ def add_cliente():
             monto=float(data['monto']),
             iptv=int(data['iptv']),
             user=user.id,
-            paymentDate=data['fecha_instalacion'] # fecha de pago por defecto
+            paymentDate=data['fecha_instalacion']  # Fecha de pago por defecto
         )
 
+        # Agregar el estado inicial al historial de estados
+        cliente.add_status_change(cliente.status)
+
+        # Guardar en la base de datos
         db.session.add(cliente)
         db.session.commit()
 
         return jsonify({'success': True, 'message': 'Cliente agregado exitosamente'})
+    
     except Exception as e:
-        # si es por la conversión de int o float o bool
-        if e == ValueError:
+        if isinstance(e, ValueError):
             return jsonify({'success': False, 'message': 'Error en la conversión de datos'}), 400
         
         print(e)
         abort(500)
+
 
 
 @app.route('/cliente/<id>', methods=['GET'])
@@ -557,6 +591,7 @@ def activar_cliente(id):
             abort(403)
         else:
             cliente.status = True
+            cliente.add_status_change(True)
             db.session.commit()
 
             return jsonify({'success': True, 'message': 'Cliente activado exitosamente'})
@@ -580,6 +615,7 @@ def desactivar_cliente(id):
             abort(403)
         else:
             cliente.status = False
+            cliente.add_status_change(False)
             db.session.commit()
 
             return jsonify({'success': True, 'message': 'Cliente desactivado exitosamente'})

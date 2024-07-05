@@ -16,7 +16,6 @@ function Home () {
 
   //ejecutado 200ms despues de cargar la pagina
   setTimeout(() => {
-    console.log(localStorage.getItem('espectador'));
     if (localStorage.getItem('espectador') === 'true') {
       setSpectator(true);
     } else {

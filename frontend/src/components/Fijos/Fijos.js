@@ -318,7 +318,6 @@ function Fijos({spectator}) {
             fecha: new Date(anio, mes, 1)
         });
         setVisibleRegisterGasto(true);
-        console.log(newPagoData);
     }
 
     const createGasto = (event) => {
@@ -370,6 +369,32 @@ function Fijos({spectator}) {
                     }
                 }
             })
+        }
+    }
+
+
+    const shouldPayThisMonth = (statusHistory, monthIn, yearIn) => {
+        try {
+
+            let current_status = true;
+
+            // iterar hasta llegar al mes o al final del historial
+            for (let i = 0; i < statusHistory.length; i++) {
+                let date = statusHistory[i].date.split('-');
+                let month = parseInt(date[1]);
+                let year = parseInt(date[0]);
+
+                if (yearIn < year || (yearIn === year && monthIn < month)) {
+                    return current_status;
+                }
+
+                current_status = statusHistory[i].status;
+            }
+
+            return current_status;
+            
+        } catch (error) {
+            return true; // Si no encontramos ningún registro para ese mes, retornamos false por defecto
         }
     }
 
@@ -448,7 +473,7 @@ function Fijos({spectator}) {
                                         const despuesDeInscripcion = yearInScreen > inscriptionYear || (yearInScreen === inscriptionYear && monthInScreen >= inscriptionMonth);
                                         const antesOIgualAHoy = yearInScreen < todaysYear || (yearInScreen === todaysYear && monthInScreen <= todaysMonth);
 
-                                        if (despuesDeInscripcion && antesOIgualAHoy) {
+                                        if (despuesDeInscripcion && antesOIgualAHoy && shouldPayThisMonth(cliente.status_history, monthInScreen + 1, yearInScreen)) {
                                             if (cliente.pagos[monthInScreen] === null) {
                                                 return <div 
                                                 className='client-month pending-month' 
