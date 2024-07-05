@@ -224,7 +224,13 @@ function Clientes({ spectator }) {
                         <p>Telefono: {clientData.telefono}</p>
                         <p>Direccion: {clientData.direccion}</p>
                         <p>Fecha de instalacion: {
-                            new Date(clientData.fecha_instalacion).toISOString().split('T')[0]
+                            (() => {
+                                try {
+                                    return new Date(clientData.fecha_instalacion).toISOString().split('T')[0];
+                                } catch (error) {
+                                    return '';
+                                }
+                            })()
                         }</p>
                         <p>Sede: {clientData.sede}</p>
                         <p>Paquete: {clientData.paquete}</p>
@@ -255,7 +261,7 @@ function Clientes({ spectator }) {
                         <label>Direccion</label>
                         <input type="text" placeholder="Direccion" value={clientData.direccion} onChange={(e) => setClientData({ ...clientData, 'direccion': e.target.value })} />
                         <label>Fecha de Instalacion</label>
-                        <input type="date" value={new Date(clientData.fecha_instalacion).toISOString().split('T')[0]} onChange={(e) => setClientData({ ...clientData, 'fecha_instalacion': e.target.value })} />
+                        <input type="date" value= {clientData.fecha_instalacion ? new Date(clientData.fecha_instalacion).toISOString().split('T')[0] : '' } onChange={(e) => setClientData({ ...clientData, 'fecha_instalacion': e.target.value })} />
                         <label>Sede</label>
                         <input type="text" placeholder="Sede" value={clientData.sede} onChange={(e) => setClientData({ ...clientData, 'sede': e.target.value })} />
                         <label>Paquete</label>
