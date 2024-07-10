@@ -10,3 +10,22 @@
     }
 
 }
+
+
+.logout-mobile {
+    display: block;
+    background-color: #FF0000;
+    color: white;
+    border: none;
+    padding: 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    width: 100%;
+    font-size: 1.1rem;
+    padding: 20px;
+}
+
+.logout-mobile-container {
+    display: flex;
+    padding: 0;
+}
