@@ -6,6 +6,25 @@ import { serverUrl } from '../../utils/config';
 function Resumen({ spectator }) {
 
     const [year, setYear] = useState(new Date().getFullYear());
+    const [month, setMonth] = useState(new Date().getMonth() + 1);
+    
+    const monthAdd = () => {
+        if (month === 12) {
+            setMonth(1);
+            setYear(year + 1);
+        } else {
+            setMonth(month + 1);
+        }
+    }
+
+    const monthSubstract = () => {
+        if (month === 1) {
+            setMonth(12);
+            setYear(year - 1);
+        } else {
+            setMonth(month - 1);
+        }
+    }
 
     const [earnings, setEarnings] = useState(0);
 
@@ -20,8 +39,9 @@ function Resumen({ spectator }) {
     const [sumaGastosFijos, setSumaGastosFijos] = useState(0);
 
 
+
     useEffect(() => {
-        getData(year);
+        getData(year, month);
         //cerrar listas al cambiar de año
         let displayButtons = document.querySelectorAll('.display-button');
         displayButtons.forEach(button => {
@@ -32,7 +52,7 @@ function Resumen({ spectator }) {
         lists.forEach(list => {
             list.style.display = 'none';
         });
-    }, [year]);
+    }, [year, month]);
 
 
     const displayList = (e) => {
@@ -48,8 +68,8 @@ function Resumen({ spectator }) {
         }
     }
 
-    const getData = (querie_year) => {
-        const url = serverUrl + "/movimiento?anio=" + querie_year;
+    const getData = (querie_year, querie_month) => {
+        const url = serverUrl + "/movimiento?anio=" + querie_year + "&mes=" + querie_month;
         fetch(url, {
             method: 'GET',
             headers: {
@@ -126,13 +146,15 @@ function Resumen({ spectator }) {
                     //Set list
                     setIngresosEsporadicos(data.ingresos.esporadicos.map(ingreso => {
                         return {
+                            ...ingreso,
                             concepto: ingreso.descripcion,
-                            cantidad: ingreso.monto
+                            cantidad: ingreso.monto,
                         }
                     }));
 
                     setGastosEsporadicos(data.gastos.esporadicos.map(gasto => {
                         return {
+                            ...gasto,
                             concepto: gasto.descripcion,
                             cantidad: gasto.monto
                         }
@@ -140,6 +162,7 @@ function Resumen({ spectator }) {
 
                     setIngresosFijos(data.ingresos.fijos.map(ingreso => {
                         return {
+                            ...ingreso,
                             concepto: ingreso.observacion,
                             cantidad: ingreso.monto
                         }
@@ -147,6 +170,7 @@ function Resumen({ spectator }) {
 
                     setGastosFijos(data.gastos.fijos.map(gasto => {
                         return {
+                            ...gasto,
                             concepto: gasto.deber.descripcion,
                             cantidad: gasto.monto
                         }
@@ -158,14 +182,62 @@ function Resumen({ spectator }) {
             })
     }
 
+    
+
+
+    const downloadJsonData = async () => {
+        //fetch data
+        const url = serverUrl + "/movimiento?anio=" + year + "&mes=" + month;
+
+        const response = await fetch(url, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + localStorage.getItem('token')
+            }
+        });
+
+        const data = await response.json();
+
+        //create a blob with the data
+        const blob = new Blob([JSON.stringify(data)], { type: 'application/json' });
+
+        //create a url for the blob
+        const urlBlob = URL.createObjectURL(blob);
+
+        //create a link element
+        const link = document.createElement('a');
+        link.href = urlBlob;
+        link.download = 'resumen.json';
+
+        //click the link
+        link.click();
+
+        //remove the url
+        URL.revokeObjectURL(urlBlob);
+    }
+
+        
+
     return (
         <div className="main-container">
             <h1 className='h1-resumen'>
                 Resumen
+                <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '1rem'}}>
+                <button className='export-button' onClick={() => {
+                    downloadJsonData();
+                }}
+                >Exportar</button>
                 <div className='change-year'>
                     <button className='change-year-button' onClick={() => setYear(year - 1)}>{'<'}</button>
                     <div className='year'>{year}</div>
                     <button className='change-year-button' onClick={() => setYear(year + 1)}>{'>'}</button>
+                </div>
+                <div className='change-year'>
+                    <button className='change-year-button' onClick={monthSubstract}>{'<'}</button>
+                    <div className='month'>{month}</div>
+                    <button className='change-year-button' onClick={monthAdd}>{'>'}</button>
+                </div>
                 </div>
             </h1>
             <div className="resumen-container">
@@ -180,8 +252,13 @@ function Resumen({ spectator }) {
                         <ul style={{ display: 'none' }}>
                             {ingresosEsporadicos.map((ingreso, index) => {
                                 return (
-                                    <li key={index}>
-                                        <h4>{ingreso.concepto}</h4>
+                                    <li key={index} style={{position: 'relative'}}>
+                                        <div style={{display: 'flex', justifyContent: 'space-between', flexDirection: 'column'}}>
+                                            <h4>{ingreso.concepto}</h4>
+                                            <p
+                                                style={{ color: 'gray', fontSize: '0.7rem', paddingTop: '0.5rem' }}
+                                            >{new Date(ingreso.fecha).toLocaleDateString()} : {ingreso.detalle_pago}</p>
+                                        </div>
                                         <p style={{ color: 'green' }}
                                         >+ ${ingreso.cantidad}</p>
                                     </li>
@@ -199,7 +276,12 @@ function Resumen({ spectator }) {
                             {gastosEsporadicos.map((gasto, index) => {
                                 return (
                                     <li key={index}>
-                                        <h4>{gasto.concepto}</h4>
+                                        <div>
+                                            <h4>{gasto.concepto}</h4>
+                                            <p
+                                                style={{ color: 'gray', fontSize: '0.7rem', paddingTop: '0.5rem' }}
+                                            >{new Date(gasto.fecha).toLocaleDateString()} : {gasto.detalle_pago}</p>
+                                        </div>
                                         <p style={{ color: 'red' }}
                                         >- ${gasto.cantidad}</p>
                                     </li>
@@ -218,9 +300,16 @@ function Resumen({ spectator }) {
                         </div>
                         <ul style={{ display: 'none' }}>
                             {ingresosFijos.map((ingreso, index) => {
+                                const meses = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
                                 return (
                                     <li key={index}>
-                                        <h4>{ingreso.concepto}</h4>
+                                        <div>
+                                            <h4>{ingreso.concepto}</h4>
+                                            <p
+                                                style={{ color: 'gray', fontSize: '0.7rem', paddingTop: '0.5rem' }}
+                                            >{ingreso.cliente.nombre} - {new Date(ingreso.fecha_pago).toLocaleDateString()} -{ingreso.cliente.sede} ({meses[parseInt(new Date(ingreso.fecha).toLocaleDateString().split('/')[1]) - 1]})
+                                            </p>
+                                        </div>
                                         <p style={{ color: 'green' }}
                                         >+ ${ingreso.cantidad}</p>
                                     </li>
@@ -236,9 +325,16 @@ function Resumen({ spectator }) {
                         </div>
                         <ul style={{ display: 'none' }}>
                             {gastosFijos.map((gasto, index) => {
+                                const meses = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
                                 return (
                                     <li key={index}>
-                                        <h4>{gasto.concepto}</h4>
+                                        <div>
+                                            <h4>{gasto.concepto}</h4>
+                                            <p
+                                                style={{ color: 'gray', fontSize: '0.7rem', paddingTop: '0.5rem' }}
+                                            >{gasto.deber.detalle} - {new Date(gasto.fecha_pago).toLocaleDateString()} -{gasto.deber.descripcion} ({meses[parseInt(new Date(gasto.fecha).toLocaleDateString().split('/')[1] - 1)]})
+                                            </p>
+                                        </div>
                                         <p style={{ color: 'red' }}
                                         >- ${gasto.cantidad}</p>
                                     </li>

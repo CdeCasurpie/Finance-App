@@ -188,3 +188,22 @@
 .change-year button:active {
     transform: scale(0.95);
 }
+
+.export-button {
+    background-color: var(--card-color);
+    border: 1px solid var(--primary-color);
+    padding: 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.export-button:hover {
+    background-color: var(--primary-color);
+    transition: all 0.3s;
+    color: var(--card-color);
+}
+
+.export-button:active {
+    transform: scale(0.95);
+}

@@ -5,7 +5,7 @@ import { serverUrl } from '../../utils/config';
 
 
 
-function Fijos({spectator}) {
+function Fijos({ spectator }) {
     //Variables de estado -------------------------------
     const [monthsToShow, setMonthsToShow] = useState(3); //meses a mostrar
     const [year, setYear] = useState(new Date().getFullYear()); //año actual
@@ -13,16 +13,18 @@ function Fijos({spectator}) {
     const [type, setType] = useState('Ingresos');
     const [errors, setErrors] = useState([]); //errores lista
     const [enabled, setEnabled] = useState(false); // false = Ingresos, true = Gastos
-    
+    const [editModal, setEditModal] = useState(false);
+    const [editModalType, setEditModalType] = useState(''); //gasto o ingreso
 
 
     //Datos de la API -----------------------------------
     //clientes: lista de clientes con sus pagos
     const [clientes, setClientes] = useState([]);
     const [newPagoData, setNewPagoData] = useState({}); //datos del nuevo pago a registrar
+    const [editPagoData, setEditPagoData] = useState({}); //datos del nuevo pago a registrar
     //deberes: lista de deberes que debe pagar el usuario
     const [deberes, setDeberes] = useState([]);
- 
+
     //ventanas emergentes --------------------------------
     //forms para ingresos
     const [createClientForm, setVisibleCreateClient] = useState(false); //estado del formulario de creacion de cliente
@@ -30,7 +32,7 @@ function Fijos({spectator}) {
     //forms para gastos
     const [createDeberForm, setVisibleCreateDeber] = useState(false); //estado del formulario de creacion de gasto
     const [registerGastoForm, setVisibleRegisterGasto] = useState(false); //estado del formulario de registro de gasto
-    
+
 
     //iterator month
     const thisMonth = new Date().getMonth();
@@ -97,43 +99,43 @@ function Fijos({spectator}) {
             headers: {
                 'Authorization': 'Bearer ' + localStorage.getItem('token')
             }
-        })  
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                const clientes = data.clientes;
-                /*
-                Atributos importantes:
-                - nombre: Nombre del cliente
-                - telefono: Telefono del cliente
-                - montos: Monto a pagar
-                */
-                
-                //crear una lista de pagos por cliente
-                //si en el indice i no hay pagos, se pone un None
-                clientes.forEach(cliente => {
-                    let pagos = Array(12).fill(null);
-                    cliente.pagos.forEach(pago => {
-                        const fecha = new Date(pago.fecha);
-                        const mes = fecha.getMonth();
-                        pagos[mes] = pago;
-                    });
-                    cliente.pagos = pagos;
-                });
-
-                while(clientes.length < 5) {
-                    clientes.push({
-                        nombre: '',
-                        telefono: '',
-                        monto: null,
-                        pagos: []
-                    });
-                }
-
-                setClientes(clientes);
-            }
         })
-        .catch(error => console.log(error));
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const clientes = data.clientes;
+                    /*
+                    Atributos importantes:
+                    - nombre: Nombre del cliente
+                    - telefono: Telefono del cliente
+                    - montos: Monto a pagar
+                    */
+
+                    //crear una lista de pagos por cliente
+                    //si en el indice i no hay pagos, se pone un None
+                    clientes.forEach(cliente => {
+                        let pagos = Array(12).fill(null);
+                        cliente.pagos.forEach(pago => {
+                            const fecha = new Date(pago.fecha);
+                            const mes = fecha.getMonth();
+                            pagos[mes] = pago;
+                        });
+                        cliente.pagos = pagos;
+                    });
+
+                    while (clientes.length < 5) {
+                        clientes.push({
+                            nombre: '',
+                            telefono: '',
+                            monto: null,
+                            pagos: []
+                        });
+                    }
+
+                    setClientes(clientes);
+                }
+            })
+            .catch(error => console.log(error));
     }
 
     const createClient = (evenet) => {
@@ -160,17 +162,17 @@ function Fijos({spectator}) {
             },
             body: JSON.stringify(datain)
         })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                getClients(year);
-                setVisibleCreateClient(false);
-                form.reset();
-            } else {
-                console.log(data);
-            }
-        })
-        .catch(error => console.log(error));
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    getClients(year);
+                    setVisibleCreateClient(false);
+                    form.reset();
+                } else {
+                    console.log(data);
+                }
+            })
+            .catch(error => console.log(error));
     }
 
     const showPagoForm = (cliente, mes, anio) => {
@@ -181,45 +183,38 @@ function Fijos({spectator}) {
         setVisibleRegisterPago(true);
     }
 
-    const createPago = (event) => {
-        event.preventDefault();
-        const url = serverUrl + '/movimiento/fijo/ingreso'
 
-        const form = event.target;
-        const datain = {};
-        const campos = ['numero_operacion', 'observacion', 'fecha', 'monto'];
-
-        for (let campo of campos) {
-            datain[campo] = form[campo].value;
+    const editPagoGasto = (e, type) => {
+        e.preventDefault();
+        let url = '';
+        if (type === 'gasto') {
+            url = serverUrl + '/movimiento/fijo/gasto'
+        } else {
+            url = serverUrl + '/movimiento/fijo/ingreso'
         }
 
-        datain.cliente_id = newPagoData.cliente_id;
-        //fecha a YYYY-MM-DD
-        datain.fecha = newPagoData.fecha.getFullYear() + '-' + newPagoData.fecha.getMonth().toString().padStart(2, '0') + '-' + datain.fecha.toString().padStart(2, '0');
-        datain.monto = parseFloat(datain.monto);
+        const datain = editPagoData;
 
-        //verificar que la fecha sea real , osea que febrero no tenga 30 dias
-        if (datain.fecha.split('-')[2] > 28 && datain.fecha.split('-')[1] === 2) {
-            setErrors(['Fecha invalida: Febrero solo tiene 28 dias']);
-        } else if (datain.fecha.split('-')[2] > 30 && [4, 6, 9, 11].includes(parseInt(datain.fecha.split('-')[1]))) {
-            setErrors(['Fecha invalida: Este mes solo tiene 30 dias']);
-        } else {
-            setErrors([]);
-            fetch(url, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': 'Bearer ' + localStorage.getItem('token')
-                },
-                body: JSON.stringify(datain)
-            })
+        datain['fecha'] = datain['fecha'] ? new Date(datain['fecha']).toISOString().split('T')[0] : null;
+        datain['monto'] = parseFloat(datain['monto']);
+        datain['fecha_pago'] = datain['fecha_pago'] ? new Date(datain['fecha_pago']).toISOString().split('T')[0] : null;
+
+
+        fetch(url, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + localStorage.getItem('token')
+            },
+            body: JSON.stringify(datain)
+        })
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
                     getClients(year);
-                    setVisibleRegisterPago(false);
-                    form.reset();
-                    setErrors([]);
+                    getDeberes(year);
+
+                    setEditModal(false);
                 } else {
                     if (data.errors) {
                         setErrors(data.errors);
@@ -230,8 +225,8 @@ function Fijos({spectator}) {
                     }
                 }
             })
-        }
     }
+
 
     const getDeberes = (year) => {
         const url = serverUrl + '/deber'
@@ -242,34 +237,34 @@ function Fijos({spectator}) {
                 'Authorization': 'Bearer ' + localStorage.getItem('token')
             }
         })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                const deberes = data.deberes;
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const deberes = data.deberes;
 
-                deberes.forEach(deber => {
-                    let pagos = Array(12).fill(null);
-                    deber.pagos.forEach(pago => {
-                        const fecha = new Date(pago.fecha);
-                        const mes = fecha.getMonth();
-                        pagos[mes] = pago;
+                    deberes.forEach(deber => {
+                        let pagos = Array(12).fill(null);
+                        deber.pagos.forEach(pago => {
+                            const fecha = new Date(pago.fecha);
+                            const mes = fecha.getMonth();
+                            pagos[mes] = pago;
+                        });
+                        deber.pagos = pagos;
                     });
-                    deber.pagos = pagos;
-                });
 
-                while(deberes.length < 5) {
-                    deberes.push({
-                        detalle: '',
-                        descripcion: '',
-                        fecha_inicio: '',
-                        repeticion: null,
-                        pagos: []
-                    });
+                    while (deberes.length < 5) {
+                        deberes.push({
+                            detalle: '',
+                            descripcion: '',
+                            fecha_inicio: '',
+                            repeticion: null,
+                            pagos: []
+                        });
+                    }
+
+                    setDeberes(deberes);
                 }
-
-                setDeberes(deberes);
-            }
-        })
+            })
     }
 
     const createDeber = (event) => {
@@ -294,22 +289,22 @@ function Fijos({spectator}) {
             },
             body: JSON.stringify(datain)
         })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                getDeberes(year);
-                setVisibleCreateDeber(false);
-                form.reset();
-            } else {
-                if (data.errors) {
-                    setErrors(data.errors);
-                } else if (data.message) {
-                    setErrors([data.message]);
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    getDeberes(year);
+                    setVisibleCreateDeber(false);
+                    form.reset();
                 } else {
-                    setErrors(['Error desconocido']);
+                    if (data.errors) {
+                        setErrors(data.errors);
+                    } else if (data.message) {
+                        setErrors([data.message]);
+                    } else {
+                        setErrors(['Error desconocido']);
+                    }
                 }
-            }
-        })
+            })
     }
 
     const showGastoForm = (deber, mes, anio) => {
@@ -320,38 +315,81 @@ function Fijos({spectator}) {
         setVisibleRegisterGasto(true);
     }
 
+
+    const createPago = (event) => {
+        event.preventDefault();
+        const url = serverUrl + '/movimiento/fijo/ingreso'
+
+        const form = event.target;
+        const datain = {};
+        const campos = ['numero_operacion', 'observacion', 'fecha_pago', 'monto'];
+
+        for (let campo of campos) {
+            datain[campo] = form[campo].value;
+        }
+
+        console.log(datain);
+
+        datain.cliente_id = newPagoData.cliente_id;
+        //fecha a YYYY-MM-DD
+        datain.fecha = newPagoData.fecha.getFullYear() + '-' + newPagoData.fecha.getMonth().toString().padStart(2, '0') + '-15';
+        datain.monto = parseFloat(datain.monto);
+
+        setErrors([]);
+        fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + localStorage.getItem('token')
+            },
+            body: JSON.stringify(datain)
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    getClients(year);
+                    setVisibleRegisterPago(false);
+                    form.reset();
+                    setErrors([]);
+                } else {
+                    if (data.errors) {
+                        setErrors(data.errors);
+                    } else if (data.message) {
+                        setErrors([data.message]);
+                    } else {
+                        setErrors(['Error desconocido']);
+                    }
+                }
+            })
+    }
+
     const createGasto = (event) => {
         event.preventDefault();
         const url = serverUrl + '/movimiento/fijo/gasto'
 
         const form = event.target;
         const datain = {};
-        const campos = ['numero_operacion', 'observacion', 'fecha', 'monto'];
-
+        const campos = ['numero_operacion', 'observacion', 'fecha_pago', 'monto'];
         for (let campo of campos) {
             datain[campo] = form[campo].value;
         }
 
         datain.deber_id = newPagoData.deber_id;
         //fecha a YYYY-MM-DD
-        datain.fecha = newPagoData.fecha.getFullYear() + '-' + newPagoData.fecha.getMonth().toString().padStart(2, '0') + '-' + datain.fecha.toString().padStart(2, '0');
+        datain.fecha = newPagoData.fecha.getFullYear() + '-' + newPagoData.fecha.getMonth().toString().padStart(2, '0') + '-15';
         datain.monto = parseFloat(datain.monto);
 
+
         //verificar que la fecha sea real , osea que febrero no tenga 30 dias
-        if (datain.fecha.split('-')[2] > 28 && datain.fecha.split('-')[1] === 2) {
-            setErrors(['Fecha invalida: Febrero solo tiene 28 dias']);
-        } else if (datain.fecha.split('-')[2] > 30 && [4, 6, 9, 11].includes(parseInt(datain.fecha.split('-')[1]))) {
-            setErrors(['Fecha invalida: Este mes solo tiene 30 dias']);
-        } else {
-            setErrors([]);
-            fetch(url, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': 'Bearer ' + localStorage.getItem('token')
-                },
-                body: JSON.stringify(datain)
-            })
+        setErrors([]);
+        fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + localStorage.getItem('token')
+            },
+            body: JSON.stringify(datain)
+        })
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
@@ -369,7 +407,6 @@ function Fijos({spectator}) {
                     }
                 }
             })
-        }
     }
 
 
@@ -392,7 +429,7 @@ function Fijos({spectator}) {
             }
 
             return current_status;
-            
+
         } catch (error) {
             return true; // Si no encontramos ningún registro para ese mes, retornamos false por defecto
         }
@@ -413,7 +450,7 @@ function Fijos({spectator}) {
                             Ingresos
                         </label>
 
-                        <div className={`toogle-switch-button ${enabled ? "button-enabled" : "button-disabled"}`} 
+                        <div className={`toogle-switch-button ${enabled ? "button-enabled" : "button-disabled"}`}
                             onClick={() => {
                                 setEnabled(!enabled);
                                 setType(type === 'Ingresos' ? 'Gastos' : 'Ingresos');
@@ -431,24 +468,24 @@ function Fijos({spectator}) {
                     </div>
                 </div>
             </h1>
-            { type === 'Ingresos' && (
+            {type === 'Ingresos' && (
                 <div className='fijos-container'>
                     <h2>
                         <label className='hideMobile'>Ingresos {year}</label>
                         <button className='arrow-button' onClick={backMonth}>{'<'}</button>
                         <button className='arrow-button' onClick={advanceMonth}>{'>'}</button>
-                        { !spectator && (
+                        {!spectator && (
                             <button className='add-button' onClick={() => setVisibleCreateClient(true)}>+</button>
                         )}
                     </h2>
                     <div className='months-header'>
-                        { months.slice(iteratorMonth, iteratorMonth + monthsToShow).map((month, i) => (
+                        {months.slice(iteratorMonth, iteratorMonth + monthsToShow).map((month, i) => (
                             <div className={`month ${iteratorMonth + i === thisMonth && year === thisYear ? 'actual' : ''}`} key={i}>{month}</div>
                         ))}
                     </div>
 
                     <div className='clients-list-container'>
-                        { clientes.map(cliente => (
+                        {clientes.map(cliente => (
                             <div className='client-list' key={cliente.id}>
                                 <div className='client-data'>
                                     <div className='client-name'>{cliente.nombre}</div>
@@ -456,8 +493,8 @@ function Fijos({spectator}) {
                                     <div className='client-value hideMobile'>{cliente.monto}</div>
                                 </div>
                                 <div className='client-months'>
-                                    { months.slice(iteratorMonth, iteratorMonth + monthsToShow).map((month, i) => {
-                                    
+                                    {months.slice(iteratorMonth, iteratorMonth + monthsToShow).map((month, i) => {
+
                                         //si se debe mostrar alguna información (despues de inscripcion 
                                         // y antes o igual a hoy) se muestra el pago o pendiente
 
@@ -473,21 +510,43 @@ function Fijos({spectator}) {
                                         const despuesDeInscripcion = yearInScreen > inscriptionYear || (yearInScreen === inscriptionYear && monthInScreen >= inscriptionMonth);
                                         const antesOIgualAHoy = yearInScreen < todaysYear || (yearInScreen === todaysYear && monthInScreen <= todaysMonth);
 
+
+                                        const esMesPasado = yearInScreen < todaysYear || (yearInScreen === todaysYear && monthInScreen < todaysMonth);
+
                                         if (despuesDeInscripcion && antesOIgualAHoy && shouldPayThisMonth(cliente.status_history, monthInScreen + 1, yearInScreen)) {
                                             if (cliente.pagos[monthInScreen] === null) {
-                                                return <div 
-                                                className='client-month pending-month' 
-                                                onClick={() => {
-                                                    if (!spectator) {
-                                                        showPagoForm(cliente, monthInScreen + 1, yearInScreen);
-                                                    }
-                                                }}
-                                                key={i}
+                                                return <div
+                                                    className='client-month pending-month'
+                                                    onClick={() => {
+                                                        if (!spectator) {
+                                                            showPagoForm(cliente, monthInScreen + 1, yearInScreen);
+                                                        }
+                                                    }}
+                                                    key={i}
+                                                    {...esMesPasado && {
+                                                        style: {
+                                                            border: '1px solid red'
+                                                        }
+                                                    }}
                                                 >
                                                     Pendiente
                                                 </div>
                                             } else {
-                                                return <div className='client-month client-paied-month' key={i}>
+                                                return <div className='client-month client-paied-month' key={i}
+                                                    {...esMesPasado && {
+                                                        style: {
+                                                            border: '1px solid rgba(0, 255, 0, 0.5)'
+                                                        }
+                                                    }}
+                                                    onClick={() => {
+                                                        console.log(cliente.pagos[monthInScreen]);
+                                                        if (!spectator) {
+                                                            setEditPagoData({ ...cliente.pagos[monthInScreen], fecha: new Date(yearInScreen, monthInScreen, 15) });
+                                                            setEditModal(true);
+                                                            setEditModalType('ingreso');
+                                                        }
+                                                    }}
+                                                >
                                                     <p>{cliente.pagos[monthInScreen].observacion}</p>
                                                     <p>{cliente.pagos[monthInScreen].monto}</p>
                                                 </div>
@@ -503,24 +562,24 @@ function Fijos({spectator}) {
                 </div>
             )}
 
-            { type === 'Gastos' && (
+            {type === 'Gastos' && (
                 <div className='fijos-container'>
                     <h2>
                         <label className='hideMobile'>Gastos {year}</label>
                         <button className='arrow-button' onClick={backMonth}>{'<'}</button>
                         <button className='arrow-button' onClick={advanceMonth}>{'>'}</button>
-                        { !spectator && (
+                        {!spectator && (
                             <button className='add-button' onClick={() => setVisibleCreateDeber(true)}>+</button>
                         )}
                     </h2>
                     <div className='months-header'>
-                        { months.slice(iteratorMonth, iteratorMonth + monthsToShow).map((month, i) => (
+                        {months.slice(iteratorMonth, iteratorMonth + monthsToShow).map((month, i) => (
                             <div className={`month ${iteratorMonth + i === thisMonth && year === thisYear ? 'actual' : ''}`} key={i}>{month}</div>
                         ))}
                     </div>
 
                     <div className='clients-list-container'>
-                        { deberes.map(deber => (
+                        {deberes.map(deber => (
                             <div className='client-list' key={deber.id}>
                                 <div className='client-data'>
                                     <div className='client-name'>{deber.detalle}</div>
@@ -528,8 +587,8 @@ function Fijos({spectator}) {
                                     <div className='client-value hideMobile'>{deber.repeticion}</div>
                                 </div>
                                 <div className='client-months'>
-                                    { months.slice(iteratorMonth, iteratorMonth + monthsToShow).map((month, i) => {
-                                    
+                                    {months.slice(iteratorMonth, iteratorMonth + monthsToShow).map((month, i) => {
+
                                         //si se debe mostrar alguna información (despues de inscripcion 
                                         // y antes o igual a hoy) se muestra el pago o pendiente
 
@@ -545,21 +604,46 @@ function Fijos({spectator}) {
                                         const despuesDeInscripcion = yearInScreen > inscriptionYear || (yearInScreen === inscriptionYear && monthInScreen >= inscriptionMonth);
                                         const antesOIgualAHoy = yearInScreen < todaysYear || (yearInScreen === todaysYear && monthInScreen <= todaysMonth);
 
+
+                                        const esMesPasado = yearInScreen < todaysYear || (yearInScreen === todaysYear && monthInScreen < todaysMonth);
+
                                         if (despuesDeInscripcion && antesOIgualAHoy) {
                                             if (deber.pagos[monthInScreen] === null) {
-                                                return <div 
-                                                className='client-month pending-month'
-                                                key={i}
-                                                onClick={() => {
-                                                    if (!spectator) {
-                                                        showGastoForm(deber, monthInScreen + 1, yearInScreen);
-                                                    }
-                                                }}
+                                                return <div
+                                                    className='client-month pending-month'
+                                                    key={i}
+                                                    {...esMesPasado && {
+                                                        style: {
+                                                            backgroundColor: 'rgba(255, 0, 0, 0.2)',
+                                                            border: '1px solid red'
+                                                        }
+                                                    }}
+                                                    onClick={() => {
+                                                        if (!spectator) {
+                                                            showGastoForm(deber, monthInScreen + 1, yearInScreen);
+                                                        }
+                                                    }}
                                                 >
                                                     Pendiente
                                                 </div>
                                             } else {
-                                                return <div className='client-month client-paied-month' key={i}>
+                                                return <div className='client-month client-paied-month' key={i}
+                                                    {...esMesPasado && {
+                                                        style: {
+                                                            backgroundColor: 'rgba(0, 255, 0, 0.03)',
+                                                            border: '1px solid rgba(0, 255, 0, 0.5)'
+                                                        }
+                                                    }}
+
+                                                    onClick={() => {
+                                                        if (!spectator) {
+                                                            console.log(deber.pagos[monthInScreen]);
+                                                            setEditPagoData({ ...deber.pagos[monthInScreen], fecha: new Date(yearInScreen, monthInScreen, 15) });
+                                                            setEditModal(true);
+                                                            setEditModalType('gasto');
+                                                        }
+                                                    }}
+                                                >
                                                     <p>{deber.pagos[monthInScreen].observacion}</p>
                                                     <p>{deber.pagos[monthInScreen].monto}</p>
                                                 </div>
@@ -580,86 +664,86 @@ function Fijos({spectator}) {
 
             {createClientForm && (
                 <div className="floating-window-container floating-window-container-visible">
-                <div className="floating-window">
-                    <div className="floating-window-header">
-                        <h2>Registrar nuevo Cliente</h2>
-                        <button className="cerrarOverlay" onClick={() => setVisibleCreateClient(false)}>
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-x-lg" viewBox="0 0 16 16">
-                                <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z"/>
-                            </svg>
-                        </button>
+                    <div className="floating-window">
+                        <div className="floating-window-header">
+                            <h2>Registrar nuevo Cliente</h2>
+                            <button className="cerrarOverlay" onClick={() => setVisibleCreateClient(false)}>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-x-lg" viewBox="0 0 16 16">
+                                    <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z" />
+                                </svg>
+                            </button>
+                        </div>
+                        <form onSubmit={createClient} className="floating-window-content">
+                            {/* 'nombre', 'telefono', 'direccion', 'fecha_instalacion', 'sede', 'paquete', 'login', 'caja', 'borne', 'status', 'monto', 'iptv'] */}
+                            <div className="campo">
+                                <label htmlFor="nombre">Nombre:</label>
+                                <input type="text" id="nombre" placeholder='Nombre' required />
+                            </div>
+
+                            <div className="campo">
+                                <label htmlFor="telefono">Telefono:</label>
+                                <input type="text" id="telefono" placeholder='Telefono' required />
+                            </div>
+
+                            <div className="campo">
+                                <label htmlFor="direccion">Direccion:</label>
+                                <input type="text" id="direccion" placeholder='Direccion' required />
+                            </div>
+
+                            <div className="campo">
+                                <label htmlFor="fecha_instalacion">Fecha de Instalacion:</label>
+                                <input type="date" id="fecha_instalacion" placeholder='Fecha de Instalacion' required />
+                            </div>
+
+                            <div className="campo">
+                                <label htmlFor="sede">Sede:</label>
+                                <input type="text" id="sede" placeholder='Sede' required />
+                            </div>
+
+                            <div className="campo">
+                                <label htmlFor="paquete">Paquete:</label>
+                                <input type="text" id="paquete" placeholder='Paquete' required />
+                            </div>
+
+                            <div className="campo">
+                                <label htmlFor="login">Login:</label>
+                                <input type="text" id="login" placeholder='Login' required />
+                            </div>
+
+                            <div className="campo">
+                                <label htmlFor="caja">Caja:</label>
+                                <input type="number" id="caja" placeholder='Caja' required />
+                            </div>
+
+                            <div className="campo">
+                                <label htmlFor="borne">Borne:</label>
+                                <input type="number" id="borne" placeholder='Borne' required />
+                            </div>
+
+                            <div className="campo" style={{ display: 'none' }}>
+                                <label htmlFor="status">Status:</label>
+                                <input type="text" id="status" placeholder='Status' />
+                            </div>
+
+                            <div className="campo">
+                                <label htmlFor="monto">Monto:</label>
+                                <input type="number" id="monto" placeholder='Monto' required />
+                            </div>
+
+                            <div className="campo">
+                                <label htmlFor="iptv">IPTV:</label>
+                                <input type="number" id="iptv" placeholder='IPTV' required />
+                            </div>
+
+                            <div className="floating-window-buttons">
+                                <button type='submit' className='floating-window-buttons-submit'>Crear Cliente</button>
+                                <button
+                                    onClick={() => setVisibleCreateClient(false)}
+                                >Cancelar</button>
+                            </div>
+                        </form>
                     </div>
-                    <form onSubmit={createClient} className="floating-window-content">
-                        {/* 'nombre', 'telefono', 'direccion', 'fecha_instalacion', 'sede', 'paquete', 'login', 'caja', 'borne', 'status', 'monto', 'iptv'] */}
-                        <div className="campo">
-                            <label htmlFor="nombre">Nombre:</label>
-                            <input type="text" id="nombre" placeholder='Nombre' required />
-                        </div>
-
-                        <div className="campo">
-                            <label htmlFor="telefono">Telefono:</label>
-                            <input type="text" id="telefono" placeholder='Telefono' required />
-                        </div>
-
-                        <div className="campo">
-                            <label htmlFor="direccion">Direccion:</label>
-                            <input type="text" id="direccion" placeholder='Direccion' required />
-                        </div>
-
-                        <div className="campo">
-                            <label htmlFor="fecha_instalacion">Fecha de Instalacion:</label>
-                            <input type="date" id="fecha_instalacion" placeholder='Fecha de Instalacion' required />
-                        </div>
-
-                        <div className="campo">
-                            <label htmlFor="sede">Sede:</label>
-                            <input type="text" id="sede" placeholder='Sede' required />
-                        </div>
-
-                        <div className="campo">
-                            <label htmlFor="paquete">Paquete:</label>
-                            <input type="text" id="paquete" placeholder='Paquete' required />
-                        </div>
-
-                        <div className="campo">
-                            <label htmlFor="login">Login:</label>
-                            <input type="text" id="login" placeholder='Login' required />
-                        </div>
-
-                        <div className="campo">
-                            <label htmlFor="caja">Caja:</label>
-                            <input type="number" id="caja" placeholder='Caja' required />
-                        </div>
-
-                        <div className="campo">
-                            <label htmlFor="borne">Borne:</label>
-                            <input type="number" id="borne" placeholder='Borne' required />
-                        </div>
-
-                        <div className="campo" style={{display: 'none'}}>
-                            <label htmlFor="status">Status:</label>
-                            <input type="text" id="status" placeholder='Status' />
-                        </div>
-
-                        <div className="campo">
-                            <label htmlFor="monto">Monto:</label>
-                            <input type="number" id="monto" placeholder='Monto' required />
-                        </div>
-
-                        <div className="campo">
-                            <label htmlFor="iptv">IPTV:</label>
-                            <input type="number" id="iptv" placeholder='IPTV' required />
-                        </div>
-
-                        <div className="floating-window-buttons">
-                            <button type='submit' className='floating-window-buttons-submit'>Crear Cliente</button>
-                            <button
-                            onClick={() => setVisibleCreateClient(false)}
-                            >Cancelar</button>
-                        </div>
-                    </form>
                 </div>
-            </div>
             )}
 
             {registerPagoForm && (
@@ -672,7 +756,7 @@ function Fijos({spectator}) {
                                 setErrors([]);
                             }}>
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-x-lg" viewBox="0 0 16 16">
-                                    <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z"/>
+                                    <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z" />
                                 </svg>
                             </button>
                         </div>
@@ -689,8 +773,8 @@ function Fijos({spectator}) {
                             </div>
 
                             <div className="campo">
-                                <label htmlFor="fecha">Dia del Mes:</label>
-                                <input type="number" id="fecha" placeholder={new Date().getDate()} min='1' max='31' required />
+                                <label htmlFor="fecha_pago">Dia del Mes:</label>
+                                <input type="date" id="fecha_pago" placeholder={new Date().getDate()} required />
                             </div>
 
                             <div className="campo">
@@ -707,10 +791,10 @@ function Fijos({spectator}) {
                             <div className="floating-window-buttons">
                                 <button type='submit' className='floating-window-buttons-submit'>Registrar Pago</button>
                                 <button
-                                onClick={() => {
-                                    setVisibleRegisterPago(false);
-                                    setErrors([]);
-                                }}
+                                    onClick={() => {
+                                        setVisibleRegisterPago(false);
+                                        setErrors([]);
+                                    }}
                                 >Cancelar</button>
                             </div>
                         </form>
@@ -720,14 +804,14 @@ function Fijos({spectator}) {
 
 
 
-            {createDeberForm && ( 
+            {createDeberForm && (
                 <div className="floating-window-container floating-window-container-visible">
                     <div className="floating-window">
                         <div className="floating-window-header">
                             <h2>Registrar Nuevo Deber</h2>
                             <button className="cerrarOverlay" onClick={() => setVisibleCreateDeber(false)}>
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-x-lg" viewBox="0 0 16 16">
-                                    <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z"/>
+                                    <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z" />
                                 </svg>
                             </button>
                         </div>
@@ -762,7 +846,7 @@ function Fijos({spectator}) {
                             <div className="floating-window-buttons">
                                 <button type='submit' className='floating-window-buttons-submit'>Crear Deber</button>
                                 <button
-                                onClick={() => setVisibleCreateDeber(false)}
+                                    onClick={() => setVisibleCreateDeber(false)}
                                 >Cancelar</button>
                             </div>
                         </form>
@@ -780,7 +864,7 @@ function Fijos({spectator}) {
                                 setErrors([]);
                             }}>
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-x-lg" viewBox="0 0 16 16">
-                                    <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z"/>
+                                    <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z" />
                                 </svg>
                             </button>
                         </div>
@@ -797,8 +881,8 @@ function Fijos({spectator}) {
                             </div>
 
                             <div className="campo">
-                                <label htmlFor="fecha">Dia del Mes:</label>
-                                <input type="number" id="fecha" placeholder={new Date().getDate()} min='1' max='31' required />
+                                <label htmlFor="fecha_pago">Dia del Mes:</label>
+                                <input type="date" id="fecha_pago" placeholder={new Date().getDate()} required />
                             </div>
 
                             <div className="campo">
@@ -824,7 +908,70 @@ function Fijos({spectator}) {
                     </div>
                 </div>
             )}
-        </div>  
+
+            {editModal && (
+                /*
+                formulario con fecha, monto, numero_operacion, observacion
+                */
+                <div className="floating-window-container floating-window-container-visible">
+                    <div className="floating-window">
+                        <div className="floating-window-header">
+                            <h2>Editar {editModalType === 'ingreso' ? 'Ingreso' : 'Gasto'}</h2>
+                            <button className="cerrarOverlay" onClick={() => setEditModal(false)}>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-x-lg" viewBox="0 0 16 16">
+                                    <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z" />
+                                </svg>
+                            </button>
+                        </div>
+                        <div className="floating-window-content">
+                            <div className="campo">
+                                <label htmlFor="numero_operacion">Numero de Operacion:</label>
+                                <input type="text" id="numero_operacion" placeholder='Numero de Operacion' value={editPagoData.numero_operacion} onChange={(event) => setEditPagoData({ ...editPagoData, numero_operacion: event.target.value })} required />
+                            </div>
+
+                            <div className="campo">
+                                <label htmlFor="observacion">Observacion:</label>
+                                <input type="text" id="observacion" placeholder='Observacion' value={editPagoData.observacion} onChange={(event) => setEditPagoData({ ...editPagoData, observacion: event.target.value })} required />
+                            </div>
+
+                            <div className="campo">
+                                <label htmlFor="fecha_pago">Dia del Mes:</label>
+                                <input type='date' id='fecha_pago'
+
+                                    value={new Date(editPagoData.fecha_pago).toISOString().split('T')[0]}
+
+                                    onChange={(event) => {
+                                        console.log(event.target.value);
+                                        //verificar fecha valida osea que se puede convertir a fecha
+                                        const date = new Date(event.target.value + 'T00:00:00');
+
+                                        try {
+                                            const prueba = new Date(date).toISOString().split('T')[0];
+                                            
+                                            setEditPagoData({ ...editPagoData, fecha_pago: date });
+                                        } catch (error) {
+                                            setEditPagoData({ ...editPagoData, fecha_pago: new Date() });
+                                        }
+
+                                    }} required />
+                            </div>
+
+                            <div className="campo">
+                                <label htmlFor="monto">Monto:</label>
+                                <input type="number" id="monto" placeholder='Monto' 
+                                value={editPagoData.monto} 
+                                onChange={(event) => setEditPagoData({ ...editPagoData, monto: event.target.value })} required />
+                            </div>
+
+                            <div className="floating-window-buttons">
+                                <button className='floating-window-buttons-submit' onClick={(e) => editPagoGasto(e, editModalType)}>Editar</button>
+                                <button onClick={() => setEditModal(false)}>Cancelar</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+        </div>
     );
 }
 

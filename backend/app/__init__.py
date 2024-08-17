@@ -146,6 +146,7 @@ class Fijo(db.Model):
     id = db.Column(db.String(50), db.ForeignKey('movimiento.id'), primary_key=True)
     numero_operacion = db.Column(db.String(50), nullable=False)
     observacion = db.Column(db.String(100), nullable=False)
+    fecha_pago = db.Column(db.DateTime, nullable=True)
 
     user_id = db.Column(db.String(50), db.ForeignKey('user.id'), nullable=False)
 
@@ -157,6 +158,7 @@ class Fijo(db.Model):
             'numero_operacion': self.numero_operacion,
             'observacion': self.observacion,
             'fecha': self.movimiento.fecha,
+            'fecha_pago': self.fecha_pago,
             'monto': self.movimiento.monto
         }
 
@@ -200,6 +202,7 @@ class IngresoFijo(db.Model):
             'id': self.id,
             'cliente': self.cliente.serialize(),
             'fecha': self.fijo.movimiento.fecha,
+            'fecha_pago': self.fijo.fecha_pago,
             'monto': self.fijo.movimiento.monto,
             'numero_operacion': self.fijo.numero_operacion,
             'observacion': self.fijo.observacion
@@ -221,6 +224,7 @@ class GastoFijo(db.Model):
             'id': self.id,
             'deber': self.deber.serialize(),
             'fecha': self.fijo.movimiento.fecha,
+            'fecha_pago': self.fijo.fecha_pago,
             'monto': self.fijo.movimiento.monto,
             'numero_operacion': self.fijo.numero_operacion,
             'observacion': self.fijo.observacion
@@ -831,8 +835,29 @@ def get_movimientos():
             anio = int(arguments['anio'])
 
 
+        #obtener el mes donde se realizaron los movimientos
+        mes = Movimiento.query.filter_by(user=user.id).order_by(Movimiento.fecha.desc()).first()
+        if mes is None:
+            mes = datetime.now().month
+        else:
+            mes = int(datetime.strptime(str(mes.fecha), '%Y-%m-%d %H:%M:%S').month)
+
+        if 'mes' in arguments:
+            mes = int(arguments['mes'])
+
+               
+        maxday = 31
+
+        if mes in [4, 6, 9, 11]:
+            maxday = 30
+        elif mes == 2:
+            if anio % 4 == 0:
+                maxday = 29
+            else:
+                maxday = 28
+
         # para los esporadicos distribuir entre ganancias y gastos
-        esporadicos = Esporadico.query.filter_by(user=user.id).join(Movimiento).filter(Movimiento.fecha >= datetime(anio, 1, 1), Movimiento.fecha <= datetime(anio, 12, 31)).all()
+        esporadicos = Esporadico.query.filter_by(user=user.id).join(Movimiento).filter(Movimiento.fecha >= datetime(anio, mes, 1), Movimiento.fecha <= datetime(anio, mes, maxday)).all()
         print("esp:", esporadicos)
 
         for esporadico in esporadicos:
@@ -841,9 +866,12 @@ def get_movimientos():
             else:
                 gastos['esporadicos'].append(esporadico.serialize())
 
+        
+ 
+
         # para los fijos solo consultar los gastos y los ingresos
-        gastos_fijos = GastoFijo.query.filter_by(user=user.id).join(Fijo).join(Movimiento).filter(Movimiento.fecha >= datetime(anio, 1, 1), Movimiento.fecha <= datetime(anio, 12, 31)).all()
-        ingresos_fijos = IngresoFijo.query.filter_by(user=user.id).join(Fijo).join(Movimiento).filter(Movimiento.fecha >= datetime(anio, 1, 1), Movimiento.fecha <= datetime(anio, 12, 31)).all()
+        gastos_fijos = GastoFijo.query.filter_by(user=user.id).join(Fijo).join(Movimiento).filter(Movimiento.fecha >= datetime(anio, mes, 1), Movimiento.fecha <= datetime(anio, mes, maxday)).all()
+        ingresos_fijos = IngresoFijo.query.filter_by(user=user.id).join(Fijo).join(Movimiento).filter(Movimiento.fecha >= datetime(anio, mes, 1), Movimiento.fecha <= datetime(anio, mes, maxday)).all()
 
         # serializar los movimientos
         gastos['fijos'] = [gasto.serialize() for gasto in gastos_fijos]
@@ -933,7 +961,7 @@ def get_esporadicos():
 @app.route('/movimiento/fijo/<tipo>', methods=['POST'])
 @jwt_required()
 def add_fijo(tipo):
-    campos = ['numero_operacion', 'observacion', 'fecha', 'monto']
+    campos = ['numero_operacion', 'observacion', 'fecha', 'monto', 'fecha_pago']
     
     if tipo not in ['ingreso', 'gasto']:
         return jsonify({'success': False, 'message': 'El tipo de movimiento fijo debe ser "ingreso" o "gasto"'}), 400
@@ -941,8 +969,10 @@ def add_fijo(tipo):
     try:
         user = getUser(get_jwt_identity())
 
+
         try:
             data = request.get_json()
+            print(data)
         except:
             return jsonify({'success': False, 'message': 'Se esperaba un JSON con los datos del movimiento fijo', 'campos': campos}), 400
         
@@ -957,6 +987,11 @@ def add_fijo(tipo):
         except:
             return jsonify({'success': False, 'errors': ['El campo "fecha" debe tener el formato "YYYY-MM-DD"']}), 400
         
+        try:
+            data['fecha_pago'] = datetime.strptime(data['fecha_pago'], '%Y-%m-%d')
+        except:
+            return jsonify({'success': False, 'errors': ['El campo "fecha_pago" debe tener el formato "YYYY-MM-DD"']}), 400
+
         movimiento = Movimiento(
             id=str(uuid4()),
             fecha=data['fecha'],
@@ -968,6 +1003,7 @@ def add_fijo(tipo):
             id=movimiento.id,
             numero_operacion=data['numero_operacion'],
             observacion=data['observacion'],
+            fecha_pago=data['fecha_pago'],
             user_id=user.id,
             movimiento=movimiento
         )
@@ -1016,6 +1052,65 @@ def add_fijo(tipo):
         db.session.commit()
     
         return jsonify({'success': True, 'message': 'Movimiento fijo agregado exitosamente', 'movimiento': ingreso.serialize() if tipo == 'ingreso' else gasto.serialize()})
+    
+    except Exception as e:
+        print(e)
+        abort(500)
+
+
+@app.route('/movimiento/fijo/<tipo>', methods=['PUT'])
+@jwt_required()
+def update_fijo(tipo):
+    campos = ['numero_operacion', 'observacion', 'fecha', 'monto', 'fecha_pago']
+    
+    if tipo not in ['ingreso', 'gasto']:
+        return jsonify({'success': False, 'message': 'El tipo de movimiento fijo debe ser "ingreso" o "gasto"'}), 400
+
+    try:
+        user = getUser(get_jwt_identity())
+
+        try:
+            data = request.get_json()
+            print(data)
+        except:
+            return jsonify({'success': False, 'message': 'Se esperaba un JSON con los datos del movimiento fijo', 'campos': campos}), 400
+        
+        errors = verificar_JSON(data, campos)
+
+        if len(errors) > 0:
+            return basicError(errors)
+        
+        # parsear fecha
+        try:
+            data['fecha'] = datetime.strptime(data['fecha'], '%Y-%m-%d')
+        except:
+            return jsonify({'success': False, 'errors': ['El campo "fecha" debe tener el formato "YYYY-MM-DD"']}), 400
+        
+        # parsear fecha de pago
+        try:
+            data['fecha_pago'] = datetime.strptime(data['fecha_pago'], '%Y-%m-%d')
+        except:
+            return jsonify({'success': False, 'errors': ['El campo "fecha_pago" debe tener el formato "YYYY-MM-DD"']}), 400
+
+        movimiento = Movimiento.query.filter_by(id=data['id']).first()
+
+        if movimiento is None:
+            return jsonify({'success': False, 'message': 'Movimiento fijo no encontrado'}), 400
+        elif movimiento.user != user.id:
+            abort(403)
+        else:
+            fijo = Fijo.query.filter_by(id=data['id']).first()
+
+            for campo in campos:
+                if campo in data:
+                    print(campo, data[campo])
+                    setattr(fijo, campo, data[campo])
+            
+            setattr(movimiento, 'monto', data['monto'])
+            
+            db.session.commit()
+
+            return jsonify({'success': True, 'message': 'Movimiento fijo actualizado exitosamente', 'movimiento': fijo.serialize()})
     
     except Exception as e:
         print(e)
