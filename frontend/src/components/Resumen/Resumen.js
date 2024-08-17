@@ -224,7 +224,7 @@ function Resumen({ spectator }) {
             <h1 className='h1-resumen'>
                 Resumen
                 <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '1rem'}}>
-                <button className='export-button' onClick={() => {
+                <button className='export-button hideMobile' onClick={() => {
                     downloadJsonData();
                 }}
                 >Exportar</button>
@@ -307,7 +307,7 @@ function Resumen({ spectator }) {
                                             <h4>{ingreso.concepto}</h4>
                                             <p
                                                 style={{ color: 'gray', fontSize: '0.7rem', paddingTop: '0.5rem' }}
-                                            >{ingreso.cliente.nombre} - {new Date(ingreso.fecha_pago).toLocaleDateString()} -{ingreso.cliente.sede} ({meses[parseInt(new Date(ingreso.fecha).toLocaleDateString().split('/')[1]) - 1]})
+                                            >{ingreso.cliente.nombre} - {new Date(ingreso.fecha_pago).toISOString().split('T')[0]} -{ingreso.cliente.sede} ({meses[parseInt(new Date(ingreso.fecha).toISOString().split('-')[1]) - 1]})
                                             </p>
                                         </div>
                                         <p style={{ color: 'green' }}
@@ -345,13 +345,6 @@ function Resumen({ spectator }) {
                 </div>
                 <div className="sub-card resumen-total">
                     <h2>Ganancias: {earnings}</h2>
-                </div>
-                <div className='sub-card showMobile logout-mobile-container'>
-                    <button className='logout-mobile' onClick={() => {
-                        localStorage.removeItem('token');
-                        localStorage.setItem('espectador', false);
-                        window.location.href = '/login-register';
-                    }}>Cerrar sesión</button>
                 </div>
             </div>
 

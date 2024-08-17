@@ -72,6 +72,14 @@ function Home () {
       </main>
 
       <Navbar setSection={selectSection}/>
+
+      <div className='sub-card showMobile logout-mobile-container'>
+                    <button className='logout-mobile' onClick={() => {
+                        localStorage.removeItem('token');
+                        localStorage.setItem('espectador', false);
+                        window.location.href = '/login-register';
+                    }}>Cerrar sesión</button>
+                </div>
     </div>
   );
 }

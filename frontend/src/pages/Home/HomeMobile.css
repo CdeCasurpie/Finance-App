@@ -4,6 +4,7 @@
         height: 100vh;
         flex-direction: column;
         overflow: hidden;
+        overflow-y: scroll;
         justify-content: space-between;
     }
 

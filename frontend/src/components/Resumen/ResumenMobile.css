@@ -16,6 +16,7 @@
     display: none;
     padding: 0;
 }
+
 @media (max-width: 768px) {
     .resumen-container {
         display: flex;
@@ -30,6 +31,7 @@
     .logout-mobile-container {
         background: none;
         display: flex;
+        margin: 26px;
     }
     
 }
