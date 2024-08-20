@@ -870,8 +870,8 @@ def get_movimientos():
  
 
         # para los fijos solo consultar los gastos y los ingresos
-        gastos_fijos = GastoFijo.query.filter_by(user=user.id).join(Fijo).join(Movimiento).filter(Movimiento.fecha >= datetime(anio, mes, 1), Movimiento.fecha <= datetime(anio, mes, maxday)).all()
-        ingresos_fijos = IngresoFijo.query.filter_by(user=user.id).join(Fijo).join(Movimiento).filter(Movimiento.fecha >= datetime(anio, mes, 1), Movimiento.fecha <= datetime(anio, mes, maxday)).all()
+        gastos_fijos = GastoFijo.query.filter_by(user=user.id).join(Fijo).join(Movimiento).filter(Fijo.fecha_pago >= datetime(anio, mes, 1), Fijo.fecha_pago <= datetime(anio, mes, maxday)).all()
+        ingresos_fijos = IngresoFijo.query.filter_by(user=user.id).join(Fijo).join(Movimiento).filter(Fijo.fecha_pago >= datetime(anio, mes, 1), Fijo.fecha_pago <= datetime(anio, mes, maxday)).all()
 
         # serializar los movimientos
         gastos['fijos'] = [gasto.serialize() for gasto in gastos_fijos]
@@ -879,8 +879,8 @@ def get_movimientos():
 
         # calculos adicionales
 
-        gastoTotal = sum([gasto['monto'] for gasto in gastos['fijos']])
-        ingresoTotal = sum([ingreso['monto'] for ingreso in ingresos['fijos']])
+        gastoTotal = sum([gasto['monto'] for gasto in gastos['fijos']]) + sum([gasto['monto'] for gasto in gastos['esporadicos']])
+        ingresoTotal = sum([ingreso['monto'] for ingreso in ingresos['fijos']]) + sum([ingreso['monto'] for ingreso in ingresos['esporadicos']])
 
         gastos['total'] = gastoTotal
         ingresos['total'] = ingresoTotal
@@ -1136,6 +1136,51 @@ def get_esporadico(id):
         abort(500)
 
 
+@app.route('/movimiento/esporadico/<id>', methods=['PUT'])
+@jwt_required()
+def update_esporadico(id):
+    campos = ['tipo', 'descripcion', 'detalle_pago', 'fecha', 'monto']
+
+    try:
+        user = getUser(get_jwt_identity())
+
+        try:
+            data = request.get_json()
+        except:
+            return jsonify({'success': False, 'message': 'Se esperaba un JSON con los datos del movimiento esporadico', 'campos': campos}), 400
+
+        errors = verificar_JSON(data, campos)
+
+        if len(errors) > 0:
+            return basicError(errors)
+        
+        if data['tipo'] not in ['ingreso', 'gasto']:
+            return jsonify({'success': False, 'errors': ['El campo "tipo" debe ser "ingreso" o "gasto"']}), 400
+        
+        esporadico = Esporadico.query.filter_by(id=id).first()
+        movimiento = Movimiento.query.filter_by(id=id).first()
+
+        if esporadico is None:
+            return jsonify({'success': False, 'message': 'Movimiento esporadico no encontrado'}), 400
+        elif esporadico.user != user.id:
+            abort(403)
+        else:
+            for campo in campos:
+                if campo in data:
+                    setattr(esporadico, campo, data[campo])
+
+            setattr(movimiento, 'fecha', datetime.strptime(data['fecha'], '%Y-%m-%d'))
+            setattr(movimiento, 'monto', data['monto'])
+
+            
+            
+            db.session.commit()
+
+            return jsonify({'success': True, 'message': 'Movimiento esporadico actualizado exitosamente', 'movimiento': esporadico.serialize()})
+    
+    except Exception as e:
+        print(e)
+        abort(500)
 
 @app.route('/codigo-invitacion', methods=['GET'])
 @jwt_required()

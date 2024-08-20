@@ -309,3 +309,147 @@ li {
     list-style: none;
 }
 
+.editar-btn-esporadicos {
+    margin-left: 1rem;
+    background-color: var(--card-color);
+    color: var(--text-color);
+    padding: 0.5rem 1rem;
+    border: 1px solid var(--primary-color);
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.editar-btn-esporadicos:hover {
+    background-color: var(--primary-color);
+    color: var(--primary-color-text);
+}
+
+/*
+ <div className={`edit-modal ${editVisible ? "edit-modal-visible" : ""}`}>
+ <div className="edit-modal-content">
+     <div className="edit-modal-header">
+         <h2>Editar Movimiento</h2>
+         <button className="cerrarOverlay" onClick={() => setEditVisible(false)}>
+             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-x-lg" viewBox="0 0 16 16">
+                 <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z" />
+             </svg>
+         </button>
+     </div>
+     <div className="edit-modal-content">
+         <div className="campo">
+             <label htmlFor="descripcion">Descripción:</label>
+             <input type="text" id="descripcion" required />
+         </div>
+         <div className="campo">
+             <label htmlFor="detallePago">Detalle de Pago:</label>
+             <input type="text" id="detallePago" required />
+         </div>
+         <div className="campo">
+             <label htmlFor="monto">Monto:</label>
+             <input type="number" id="monto" required />
+         </div>
+         <div className="campo">
+             <label htmlFor="fecha">Fecha:</label>
+             <input type="date" id="fecha" required />
+         </div>
+         <div className="floating-window-buttons">
+             <button type="submit" className="floating-window-buttons-submit">
+                 Editar Movimiento
+             </button>
+         </div>
+     </div>
+ </div>
+</div>
+*/
+
+.edit-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 100;
+}
+
+.edit-modal-visible {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.edit-modal-content {
+    background-color: var(--card-color);
+    border-radius: 10px;
+    padding: 1rem;
+    position: relative;
+}
+
+.edit-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.edit-modal-header h2 {
+    color: var(--text-color);
+}
+
+.edit-modal-header button {
+    background-color: var(--button-color);
+    color: var(--text-color);
+    padding: 0.5rem;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.edit-modal-content {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    padding: 1rem;
+}
+
+.floating-window-buttons {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#floating-window-buttons-submit {
+    color: var(--primary-color);
+    padding: 0.5rem 1rem;
+    border: 1px solid var(--primary-color);
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+#floating-window-buttons-submit:hover {
+    background-color: var(--primary-color);
+    color: var(--primary-color-text);
+    transition: all 0.3s ease;
+}
+
+.cerrarOverlay {
+    background-color: var(--button-color);
+    color: var(--text-color);
+    padding: 0.5rem;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.cerrarOverlay:hover {
+    background-color: var(--primary-color);
+    color: var(--primary-color-text);
+}
+
+.edit-modal-content input {
+    padding: 0.5rem;
+    border: 1px solid var(--primary-color);
+    border-radius: 5px;
+    margin-top: 0.5rem;
+}

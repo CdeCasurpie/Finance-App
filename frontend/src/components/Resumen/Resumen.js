@@ -141,7 +141,7 @@ function Resumen({ spectator }) {
                     //Set earnings
                     let ganancia = data.ingresos.esporadicos.reduce((sum, ingreso) => sum + ingreso.monto, 0) - data.gastos.esporadicos.reduce((sum, gasto) => sum + gasto.monto, 0);
 
-                    setEarnings(ganancia);
+                    setEarnings(data.ganancia);
 
                     //Set list
                     setIngresosEsporadicos(data.ingresos.esporadicos.map(ingreso => {

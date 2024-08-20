@@ -102,6 +102,12 @@ function Esporadicos({ spectator }) {
         loadMovimientos();
     }, []);
 
+
+    //modal para edicion
+    const [editVisible, setEditVisible] = useState(false);
+    const [editData, setEditData] = useState({});
+    
+
     return (
         <div className="main-container">
             <h1>Esporadicos</h1>
@@ -123,6 +129,15 @@ function Esporadicos({ spectator }) {
                                             movimiento.tipo === "ingreso" ? {} : { color: "red" }
                                         }
                                     >{movimiento.tipo === "ingreso" ? "+" : "-"} ${movimiento.monto}</span>
+                                    
+                                    <button onClick={() => {
+                                        setEditVisible(true);
+                                        setEditData(movimiento);
+                                    }}
+                                    className="editar-btn-esporadicos"
+                                    >
+                                        Editar
+                                </button>
                                 </div>
                             </div>
                         )
@@ -213,6 +228,81 @@ function Esporadicos({ spectator }) {
                         </div>
                     </div>
                 )}
+            </div>
+
+            {/* edit modal */}
+            <div className={`edit-modal ${editVisible ? "edit-modal-visible" : ""}`}>
+                <div className="edit-modal-content">
+                    <div className="edit-modal-header">
+                        <h2>Editar Movimiento</h2>
+                        <button className="cerrarOverlay" onClick={() => setEditVisible(false)}>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-x-lg" viewBox="0 0 16 16">
+                                <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z" />
+                            </svg>
+                        </button>
+                    </div>
+                    <div className="edit-modal-content">
+                        <div className="campo">
+                            <label htmlFor="descripcion">Descripción:</label>
+                            <input type="text" id="descripcion" 
+                            value={editData.descripcion} onChange={(e) => {
+                                setEditData({...editData, descripcion: e.target.value});
+                            }} required />
+                        </div>
+                        <div className="campo">
+                            <label htmlFor="detallePago">Detalle de Pago:</label>
+                            <input type="text" id="detallePago" 
+                            value={editData.detalle_pago} onChange={(e) => {
+                                setEditData({...editData, detalle_pago: e.target.value});
+                            }} required />
+                        </div>
+                        <div className="campo">
+                            <label htmlFor="monto">Monto:</label>
+                            <input type="number" id="monto"
+                            value={editData.monto} onChange={(e) => {
+                                setEditData({...editData, monto: e.target.value});
+                            }} required />
+                        </div>
+                        <div className="campo">
+                            <label htmlFor="fecha">Fecha:</label>
+                            <input type="date" id="fecha"
+                            value={editData.fecha ? new Date(editData.fecha).toISOString().split('T')[0] : ""} onChange={(e) => {
+                                setEditData({...editData, fecha: e.target.value});
+                            }} required />
+                        </div> 
+                        <div className="floating-window-buttons">
+                            <button type="submit" id="floating-window-buttons-submit" onClick={() => {
+                                const url = serverUrl + "/movimiento/esporadico/" + editData.id;
+                                fetch(url, {
+                                    method: "PUT",
+                                    headers: {
+                                        "Content-Type": "application/json",
+                                        "Authorization": `Bearer ${localStorage.getItem("token")}`,
+                                    },
+                                    body: JSON.stringify({
+                                        ...editData,
+                                        fecha: new Date(editData.fecha).toISOString().split('T')[0],
+                                    }),
+                                })
+                                .then((res) => res.json())
+                                .then((data) => {
+                                    if (data.success) {
+                                        setEditVisible(false);
+                                        loadMovimientos();
+                                    } else {
+                                        if (data.errors) {
+                                            setErrors(data.errors);
+                                        } else if (data.message) {
+                                            setErrors([data.message]);
+                                        }
+                                    }
+                                })
+                            }}>
+                                Editar Movimiento
+                            </button>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     );

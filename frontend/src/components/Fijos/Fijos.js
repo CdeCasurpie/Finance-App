@@ -34,6 +34,10 @@ function Fijos({ spectator }) {
     const [registerGastoForm, setVisibleRegisterGasto] = useState(false); //estado del formulario de registro de gasto
 
 
+    //busqueda
+    const [nombreCliente, setNombreCliente] = useState('');
+    const [nombreDeber, setNombreDeber] = useState('');
+
     //iterator month
     const thisMonth = new Date().getMonth();
     const thisYear = new Date().getFullYear();
@@ -470,8 +474,8 @@ function Fijos({ spectator }) {
             </h1>
             {type === 'Ingresos' && (
                 <div className='fijos-container'>
-                    <h2>
-                        <label className='hideMobile'>Ingresos {year}</label>
+                    <h2 style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap' }}>
+                        <input type='text' placeholder={'Buscar Cliente ' + year} onChange={(e) => setNombreCliente(e.target.value)} value={nombreCliente} className='search-input' />
                         <button className='arrow-button' onClick={backMonth}>{'<'}</button>
                         <button className='arrow-button' onClick={advanceMonth}>{'>'}</button>
                         {!spectator && (
@@ -485,87 +489,100 @@ function Fijos({ spectator }) {
                     </div>
 
                     <div className='clients-list-container'>
-                        {clientes.map(cliente => (
-                            <div className='client-list' key={cliente.id}>
-                                <div className='client-data'>
-                                    <div className='client-name'>{cliente.nombre}</div>
-                                    <div className='client-description hideMobile'>{cliente.telefono}</div>
-                                    <div className='client-value hideMobile'>{cliente.monto}</div>
-                                </div>
-                                <div className='client-months'>
-                                    {months.slice(iteratorMonth, iteratorMonth + monthsToShow).map((month, i) => {
-
-                                        //si se debe mostrar alguna información (despues de inscripcion 
-                                        // y antes o igual a hoy) se muestra el pago o pendiente
-
-                                        //si no se debe mostrar, se muestra un espacio en blanco
-
-                                        const yearInScreen = year; //fecha actual
-                                        const monthInScreen = iteratorMonth + i;
-                                        const inscriptionYear = new Date(cliente.fecha_instalacion).getFullYear(); //fecha de inscripcion
-                                        const inscriptionMonth = new Date(cliente.fecha_instalacion).getMonth();
-                                        const todaysYear = new Date().getFullYear(); //fecha actual
-                                        const todaysMonth = new Date().getMonth();
-
-                                        const despuesDeInscripcion = yearInScreen > inscriptionYear || (yearInScreen === inscriptionYear && monthInScreen >= inscriptionMonth);
-                                        const antesOIgualAHoy = yearInScreen < todaysYear || (yearInScreen === todaysYear && monthInScreen <= todaysMonth);
+                        {clientes.map(cliente => {
 
 
-                                        const esMesPasado = yearInScreen < todaysYear || (yearInScreen === todaysYear && monthInScreen < todaysMonth);
+                            if (((!cliente.nombre.toLowerCase().includes(nombreCliente.toLowerCase()))
+                                && (!cliente.telefono.toLowerCase().includes(nombreCliente.toLowerCase()))
+                                && (!cliente.monto.toString().includes(nombreCliente))
+                            ) && cliente.nombre !== '') {
+                                return null;
+                            }
 
-                                        if (despuesDeInscripcion && antesOIgualAHoy && shouldPayThisMonth(cliente.status_history, monthInScreen + 1, yearInScreen)) {
-                                            if (cliente.pagos[monthInScreen] === null) {
-                                                return <div
-                                                    className='client-month pending-month'
-                                                    onClick={() => {
-                                                        if (!spectator) {
-                                                            showPagoForm(cliente, monthInScreen + 1, yearInScreen);
-                                                        }
-                                                    }}
-                                                    key={i}
-                                                    {...esMesPasado && {
-                                                        style: {
-                                                            border: '1px solid red'
-                                                        }
-                                                    }}
-                                                >
-                                                    Pendiente
-                                                </div>
+
+
+                            return (
+                                <div className='client-list' key={cliente.id}>
+                                    <div className='client-data'>
+                                        <div className='client-name'>{cliente.nombre}</div>
+                                        <div className='client-description hideMobile'>{cliente.telefono}</div>
+                                        <div className='client-value hideMobile'>{cliente.monto}</div>
+                                    </div>
+                                    <div className='client-months'>
+                                        {months.slice(iteratorMonth, iteratorMonth + monthsToShow).map((month, i) => {
+
+                                            //si se debe mostrar alguna información (despues de inscripcion 
+                                            // y antes o igual a hoy) se muestra el pago o pendiente
+
+                                            //si no se debe mostrar, se muestra un espacio en blanco
+
+                                            const yearInScreen = year; //fecha actual
+                                            const monthInScreen = iteratorMonth + i;
+                                            const inscriptionYear = new Date(cliente.fecha_instalacion).getFullYear(); //fecha de inscripcion
+                                            const inscriptionMonth = new Date(cliente.fecha_instalacion).getMonth();
+                                            const todaysYear = new Date().getFullYear(); //fecha actual
+                                            const todaysMonth = new Date().getMonth();
+
+                                            const despuesDeInscripcion = yearInScreen > inscriptionYear || (yearInScreen === inscriptionYear && monthInScreen >= inscriptionMonth);
+                                            const antesOIgualAHoy = yearInScreen < todaysYear || (yearInScreen === todaysYear && monthInScreen <= todaysMonth);
+
+
+                                            const esMesPasado = yearInScreen < todaysYear || (yearInScreen === todaysYear && monthInScreen < todaysMonth);
+
+                                            if (despuesDeInscripcion && antesOIgualAHoy && shouldPayThisMonth(cliente.status_history, monthInScreen + 1, yearInScreen)) {
+                                                if (cliente.pagos[monthInScreen] === null) {
+                                                    return <div
+                                                        className='client-month pending-month'
+                                                        onClick={() => {
+                                                            if (!spectator) {
+                                                                showPagoForm(cliente, monthInScreen + 1, yearInScreen);
+                                                            }
+                                                        }}
+                                                        key={i}
+                                                        {...esMesPasado && {
+                                                            style: {
+                                                                border: '1px solid red'
+                                                            }
+                                                        }}
+                                                    >
+                                                        Pendiente
+                                                    </div>
+                                                } else {
+                                                    return <div className='client-month client-paied-month' key={i}
+                                                        {...esMesPasado && {
+                                                            style: {
+                                                                border: '1px solid rgba(0, 255, 0, 0.5)'
+                                                            }
+                                                        }}
+                                                        onClick={() => {
+                                                            console.log(cliente.pagos[monthInScreen]);
+                                                            if (!spectator) {
+                                                                setEditPagoData({ ...cliente.pagos[monthInScreen], fecha: new Date(yearInScreen, monthInScreen, 15) });
+                                                                setEditModal(true);
+                                                                setEditModalType('ingreso');
+                                                            }
+                                                        }}
+                                                    >
+                                                        <p>{cliente.pagos[monthInScreen].observacion}</p>
+                                                        <p>{cliente.pagos[monthInScreen].monto}</p>
+                                                    </div>
+                                                }
                                             } else {
-                                                return <div className='client-month client-paied-month' key={i}
-                                                    {...esMesPasado && {
-                                                        style: {
-                                                            border: '1px solid rgba(0, 255, 0, 0.5)'
-                                                        }
-                                                    }}
-                                                    onClick={() => {
-                                                        console.log(cliente.pagos[monthInScreen]);
-                                                        if (!spectator) {
-                                                            setEditPagoData({ ...cliente.pagos[monthInScreen], fecha: new Date(yearInScreen, monthInScreen, 15) });
-                                                            setEditModal(true);
-                                                            setEditModalType('ingreso');
-                                                        }
-                                                    }}
-                                                >
-                                                    <p>{cliente.pagos[monthInScreen].observacion}</p>
-                                                    <p>{cliente.pagos[monthInScreen].monto}</p>
-                                                </div>
+                                                return <div className='client-month' key={i}></div>
                                             }
-                                        } else {
-                                            return <div className='client-month' key={i}></div>
-                                        }
-                                    })}
+                                        })}
+                                    </div>
                                 </div>
-                            </div>
-                        ))}
+                            )
+                        })}
                     </div>
                 </div>
             )}
 
             {type === 'Gastos' && (
                 <div className='fijos-container'>
-                    <h2>
-                        <label className='hideMobile'>Gastos {year}</label>
+                    <h2 style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap' }}>
+                        <input type='text' placeholder={'Buscar Deber ' + year} onChange={(e) => setNombreDeber(e.target.value)} value={nombreDeber} className='search-input' />
                         <button className='arrow-button' onClick={backMonth}>{'<'}</button>
                         <button className='arrow-button' onClick={advanceMonth}>{'>'}</button>
                         {!spectator && (
@@ -579,7 +596,16 @@ function Fijos({ spectator }) {
                     </div>
 
                     <div className='clients-list-container'>
-                        {deberes.map(deber => (
+                        {deberes.map(deber => {
+
+                            if (((!deber.detalle.toLowerCase().includes(nombreDeber.toLowerCase()))
+                                && (!deber.descripcion.toLowerCase().includes(nombreDeber.toLowerCase()))
+                                && (!deber.repeticion.toString().includes(nombreDeber))
+                            ) && deber.detalle !== '') {
+                                return null;
+                            }
+
+                            return (
                             <div className='client-list' key={deber.id}>
                                 <div className='client-data'>
                                     <div className='client-name'>{deber.detalle}</div>
@@ -654,7 +680,7 @@ function Fijos({ spectator }) {
                                     })}
                                 </div>
                             </div>
-                        ))}
+                        )})}
                     </div>
                 </div>
             )}
@@ -947,7 +973,7 @@ function Fijos({ spectator }) {
 
                                         try {
                                             const prueba = new Date(date).toISOString().split('T')[0];
-                                            
+
                                             setEditPagoData({ ...editPagoData, fecha_pago: date });
                                         } catch (error) {
                                             setEditPagoData({ ...editPagoData, fecha_pago: new Date() });
@@ -958,9 +984,9 @@ function Fijos({ spectator }) {
 
                             <div className="campo">
                                 <label htmlFor="monto">Monto:</label>
-                                <input type="number" id="monto" placeholder='Monto' 
-                                value={editPagoData.monto} 
-                                onChange={(event) => setEditPagoData({ ...editPagoData, monto: event.target.value })} required />
+                                <input type="number" id="monto" placeholder='Monto'
+                                    value={editPagoData.monto}
+                                    onChange={(event) => setEditPagoData({ ...editPagoData, monto: event.target.value })} required />
                             </div>
 
                             <div className="floating-window-buttons">
