@@ -490,12 +490,12 @@ function Fijos({ spectator }) {
 
                     <div className='clients-list-container'>
                         {clientes.map(cliente => {
+                             
 
-
-                            if (((!cliente.nombre.toLowerCase().includes(nombreCliente.toLowerCase()))
+                            if (cliente.nombre !== '' && cliente.telefono !== '' && cliente.monto !== null &&
+                                ((!cliente.nombre.toLowerCase().includes(nombreCliente.toLowerCase()))
                                 && (!cliente.telefono.toLowerCase().includes(nombreCliente.toLowerCase()))
-                                && (!cliente.monto.toString().includes(nombreCliente))
-                            ) && cliente.nombre !== '') {
+                                && (!cliente.monto.toString().includes(nombreCliente)))) {
                                 return null;
                             }
 
@@ -598,10 +598,10 @@ function Fijos({ spectator }) {
                     <div className='clients-list-container'>
                         {deberes.map(deber => {
 
-                            if (((!deber.detalle.toLowerCase().includes(nombreDeber.toLowerCase()))
+                            if (deber.detalle !== '' && deber.descripcion !== '' && deber.repeticion !== null &&
+                                ((!deber.detalle.toLowerCase().includes(nombreDeber.toLowerCase()))
                                 && (!deber.descripcion.toLowerCase().includes(nombreDeber.toLowerCase()))
-                                && (!deber.repeticion.toString().includes(nombreDeber))
-                            ) && deber.detalle !== '') {
+                                && (!deber.repeticion.toString().includes(nombreDeber)))){
                                 return null;
                             }
 
