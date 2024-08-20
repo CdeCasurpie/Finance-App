@@ -2,12 +2,14 @@ import './Resumen.css';
 import './ResumenMobile.css';
 import { useState, useEffect } from 'react';
 import { serverUrl } from '../../utils/config';
+import { jsPDF } from "jspdf";
+
 
 function Resumen({ spectator }) {
 
     const [year, setYear] = useState(new Date().getFullYear());
     const [month, setMonth] = useState(new Date().getMonth() + 1);
-    
+
     const monthAdd = () => {
         if (month === 12) {
             setMonth(1);
@@ -32,6 +34,8 @@ function Resumen({ spectator }) {
     const [gastosEsporadicos, setGastosEsporadicos] = useState([]);
     const [ingresosFijos, setIngresosFijos] = useState([]);
     const [gastosFijos, setGastosFijos] = useState([]);
+
+    const [answerMovimientos, setAnswerMovimientos] = useState({});
 
     const [sumaIngresosEsporadicos, setSumaIngresosEsporadicos] = useState(0);
     const [sumaGastosEsporadicos, setSumaGastosEsporadicos] = useState(0);
@@ -132,6 +136,8 @@ function Resumen({ spectator }) {
 
                 if (data.success) {
 
+                    setAnswerMovimientos(data);
+
                     //set sumas
                     setSumaIngresosEsporadicos(data.ingresos.esporadicos.reduce((sum, ingreso) => sum + ingreso.monto, 0));
                     setSumaGastosEsporadicos(data.gastos.esporadicos.reduce((sum, gasto) => sum + gasto.monto, 0));
@@ -182,7 +188,8 @@ function Resumen({ spectator }) {
             })
     }
 
-    
+
+
 
 
     const downloadJsonData = async () => {
@@ -217,27 +224,169 @@ function Resumen({ spectator }) {
         URL.revokeObjectURL(urlBlob);
     }
 
+    const download_pdf_Data = async () => {
+        // Fetch data
+        const url = serverUrl + "/movimiento?anio=" + year + "&mes=" + month;
+
+        const response = await fetch(url, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + localStorage.getItem('token')
+            }
+        });
+
+        const data = await response.json();
+
+        // Create a new jsPDF instance
+        const doc = new jsPDF();
+
+        // Add title to PDF
+        doc.setFontSize(18);
+        doc.text(`Resumen - ${month}/${year}`, 10, 10);
+
+        //linea horizontal
+        doc.setLineWidth(0.5);
+        doc.line(10, 15, 200, 15);
+
+
+        // Add content to PDF
+        let yPos = 30;
+
+        // Ingresos Esporádicos
+        doc.setFontSize(14);
+        doc.text("Ingresos Esporádicos:", 10, yPos);
+        yPos += 10;
+
+        const addYPos = (yPos, adder) => {
+            if (yPos + adder > 250) {
+                doc.addPage();
+                return 20;
+            }
+            return yPos + adder;
+        }
+
+        data.ingresos.esporadicos.forEach((ingreso, index) => {
+            doc.setFontSize(12);
+            doc.text(`${ingreso.detalle_pago} - ${new Date(ingreso.fecha).toLocaleDateString()}`, 10, yPos);
+            doc.text(`$ ${ingreso.monto}`, 150, yPos);
+            yPos = addYPos(yPos, 10);
+        });
+
+        if (data.ingresos.esporadicos.length === 0) {
+            doc.text("No hay ingresos esporádicos", 10, yPos);
+            yPos = addYPos(yPos, 10);
+        }
+
+
+        yPos = addYPos(yPos, 10);
+
+        // Gastos Esporádicos
+        doc.setFontSize(14);
+        doc.text("Gastos Esporádicos:", 10, yPos);
+
+        yPos = addYPos(yPos, 10);
+
+        data.gastos.esporadicos.forEach((gasto, index) => {
+            doc.setFontSize(12);
+            doc.text(`${gasto.detalle_pago} - ${new Date(gasto.fecha).toLocaleDateString()}`, 10, yPos);
+            doc.text(`$ ${gasto.monto}`, 150, yPos);
+
+            yPos = addYPos(yPos, 10);
+        });
+
+        if (data.gastos.esporadicos.length === 0) {
+            doc.text("No hay gastos esporádicos", 10, yPos);
+
+            yPos = addYPos(yPos, 10);
+        }
+
+
+        yPos = addYPos(yPos, 10);
+
+        // Ingresos Fijos
+        doc.setFontSize(14);
+        doc.text("Ingresos Fijos:", 10, yPos);
+
+        yPos = addYPos(yPos, 10);
+
+        data.ingresos.fijos.forEach((ingreso, index) => {
+            doc.setFontSize(12);
+            doc.text(`${ingreso.cliente.nombre} - ${new Date(ingreso.fecha_pago).toLocaleDateString()} - ${ingreso.cliente.sede}`, 10, yPos);
+            doc.text(`$ ${ingreso.monto}`, 150, yPos);
+
+            yPos = addYPos(yPos, 10);
+        });
+
+        if (data.ingresos.fijos.length === 0) {
+            doc.text("No hay ingresos fijos", 10, yPos);
+
+            yPos = addYPos(yPos, 10);
+        }
+
+
+        yPos = addYPos(yPos, 10);
+
+        // Gastos Fijos
+        doc.setFontSize(14);
+        doc.text("Gastos Fijos:", 10, yPos);
+
+        yPos = addYPos(yPos, 10);
+
+        data.gastos.fijos.forEach((gasto, index) => {
+            doc.setFontSize(12);
+            doc.text(`${gasto.deber.detalle} - ${new Date(gasto.fecha_pago).toLocaleDateString()} - ${gasto.deber.descripcion}`, 10, yPos);
+            doc.text(`$ ${gasto.monto}`, 150, yPos);
+
+            yPos = addYPos(yPos, 10);
+        });
+
+        if (data.gastos.fijos.length === 0) {
+            doc.text("No hay gastos fijos", 10, yPos);
+
+            yPos = addYPos(yPos, 10);
+        }
+
+
+        //ganancia
+        //linea horizontal
+        doc.setLineWidth(0.5);
+        doc.line(10, yPos, 200, yPos);
+
+        yPos = addYPos(yPos, 10);
+
+        doc.setFontSize(14);
+        doc.text(`Ganancia: $ ${data.ganancia}`, 10, yPos);
+
+        yPos = addYPos(yPos, 10);
+
         
+
+        // Save the PDF
+        doc.save(`Resumen_${year}_${month}.pdf`);
+    }
+
+
 
     return (
         <div className="main-container">
             <h1 className='h1-resumen'>
                 Resumen
-                <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '1rem'}}>
-                <button className='export-button hideMobile' onClick={() => {
-                    downloadJsonData();
-                }}
-                >Exportar</button>
-                <div className='change-year'>
-                    <button className='change-year-button' onClick={() => setYear(year - 1)}>{'<'}</button>
-                    <div className='year'>{year}</div>
-                    <button className='change-year-button' onClick={() => setYear(year + 1)}>{'>'}</button>
-                </div>
-                <div className='change-year'>
-                    <button className='change-year-button' onClick={monthSubstract}>{'<'}</button>
-                    <div className='month'>{month}</div>
-                    <button className='change-year-button' onClick={monthAdd}>{'>'}</button>
-                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '1rem' }}>
+                    <button className='export-button hideMobile' onClick={() => {
+                        download_pdf_Data();
+                    }}
+                    >Exportar</button>
+                    <div className='change-year'>
+                        <button className='change-year-button' onClick={() => setYear(year - 1)}>{'<'}</button>
+                        <div className='year'>{year}</div>
+                        <button className='change-year-button' onClick={() => setYear(year + 1)}>{'>'}</button>
+                    </div>
+                    <div className='change-year'>
+                        <button className='change-year-button' onClick={monthSubstract}>{'<'}</button>
+                        <div className='month'>{month}</div>
+                        <button className='change-year-button' onClick={monthAdd}>{'>'}</button>
+                    </div>
                 </div>
             </h1>
             <div className="resumen-container">
@@ -252,8 +401,8 @@ function Resumen({ spectator }) {
                         <ul style={{ display: 'none' }}>
                             {ingresosEsporadicos.map((ingreso, index) => {
                                 return (
-                                    <li key={index} style={{position: 'relative'}}>
-                                        <div style={{display: 'flex', justifyContent: 'space-between', flexDirection: 'column'}}>
+                                    <li key={index} style={{ position: 'relative' }}>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', flexDirection: 'column' }}>
                                             <h4>{ingreso.concepto}</h4>
                                             <p
                                                 style={{ color: 'gray', fontSize: '0.7rem', paddingTop: '0.5rem' }}
